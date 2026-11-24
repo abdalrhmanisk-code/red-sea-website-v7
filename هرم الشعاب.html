@@ -1,0 +1,657 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>هرم الشعاب</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@500;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: title bar, four-cell HUD, then the sea stage beside a food-pyramid column (stacked on phones). Single dark sea palette by choice. */
+:root {
+  --abyss: #04202e;
+  --deep: #0a3d52;
+  --shallow: #1b8a9c;
+  --foam: #e6f5f3;
+  --coral: #ff6b57;
+  --sun: #ffc857;
+  --reefgreen: #47c9b0;
+  --ink-soft: #9cc3cb;
+  --line: rgba(230, 245, 243, 0.14);
+  --font-display: 'Reem Kufi', 'Tajawal', system-ui, sans-serif;
+  --font-body: 'Tajawal', system-ui, sans-serif;
+  color-scheme: dark;
+}
+body {
+  background: var(--abyss);
+  color: var(--foam);
+  font-family: var(--font-body);
+  font-size: 16px;
+  padding-block: 16px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.app { max-width: 1040px; margin-inline: auto; display: flex; flex-direction: column; gap: 12px; }
+.top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+.top h1 { font-family: var(--font-display); font-size: 1.7rem; line-height: 1.2; margin: 0; }
+.top .tag { margin: 2px 0 0; color: var(--ink-soft); font-size: .9rem; }
+.tools { display: flex; gap: 8px; flex-wrap: wrap; }
+.chip {
+  font: inherit; font-size: .85rem; color: var(--foam); background: transparent;
+  border: 1px solid var(--line); border-radius: 99px; padding: 6px 14px; cursor: pointer;
+}
+.chip:hover { background: rgba(230, 245, 243, .08); }
+.chip:focus-visible, .btn:focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; }
+
+.hud { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+@media (max-width: 520px) { .hud { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.stat {
+  background: rgba(10, 61, 82, .6); border: 1px solid var(--line); border-radius: 10px;
+  padding: 8px 12px; display: flex; flex-direction: column; gap: 4px; min-width: 0;
+}
+.stat .k { font-size: .75rem; color: var(--ink-soft); }
+.stat .v { font-family: var(--font-display); font-size: 1.35rem; line-height: 1.2; font-variant-numeric: tabular-nums; display: flex; gap: 3px; align-items: center; min-height: 1.6rem; }
+.bar { height: 10px; border-radius: 99px; background: rgba(4, 32, 46, .85); overflow: hidden; margin-top: 8px; }
+.bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--shallow), #6fe0c8); transition: width .25s; }
+.heart { fill: var(--coral); }
+.heart.off { opacity: .22; }
+
+.play { display: grid; grid-template-columns: minmax(0, 1fr) 200px; gap: 12px; align-items: start; }
+@media (max-width: 760px) { .play { grid-template-columns: minmax(0, 1fr); } }
+.stage { position: relative; border-radius: 14px; overflow: hidden; background: var(--deep); border: 1px solid var(--line); }
+.stage canvas { display: block; width: 100%; height: auto; touch-action: none; cursor: crosshair; }
+.toast {
+  position: absolute; top: 10px; inset-inline: 12px; margin-inline: auto; width: fit-content; max-width: calc(100% - 24px);
+  background: rgba(4, 32, 46, .88); border: 1px solid rgba(255, 200, 87, .5); color: var(--foam);
+  padding: 8px 16px; border-radius: 10px; font-size: .95rem; line-height: 1.6; text-align: center; pointer-events: none;
+}
+.panel { position: absolute; inset: 0; display: flex; padding: 12px; overflow: auto; background: rgba(4, 32, 46, .68); }
+.card {
+  margin: auto; width: min(100%, 520px); background: rgba(8, 48, 66, .95);
+  border: 1px solid var(--line); border-radius: 14px; padding: 20px 22px;
+  display: flex; flex-direction: column; gap: 10px; align-items: flex-start;
+}
+.card h2 { font-family: var(--font-display); font-size: 1.7rem; line-height: 1.25; margin: 0; text-wrap: balance; }
+.card h3 { font-size: 1rem; margin: 6px 0 0; color: var(--sun); }
+.card p { margin: 0; line-height: 1.75; }
+.card .eyebrow { font-size: .8rem; color: var(--sun); }
+.how { display: grid; gap: 6px; margin: 4px 0 6px; font-size: .95rem; }
+.how div { display: flex; gap: 10px; }
+.how dt { font-weight: 700; color: var(--sun); min-width: 4.2em; }
+.how dd { margin: 0; }
+.endstats { display: flex; gap: 22px; flex-wrap: wrap; }
+.endstats div { display: flex; flex-direction: column; }
+.endstats .n { font-family: var(--font-display); font-size: 1.8rem; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.endstats .t { font-size: .8rem; color: var(--ink-soft); }
+.learned { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; font-size: .92rem; line-height: 1.65; }
+.btn {
+  font: inherit; font-weight: 700; color: #2b0b06; background: var(--coral); border: 0;
+  border-radius: 10px; padding: 10px 22px; cursor: pointer; margin-top: 4px;
+}
+.btn:hover { background: #ff8270; }
+.hint { margin: 0; font-size: .8rem; color: var(--ink-soft); }
+
+.pyr { background: rgba(10, 61, 82, .6); border: 1px solid var(--line); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+.pyr h2 { margin: 0; font-family: var(--font-display); font-size: 1.05rem; }
+.lvls { display: flex; flex-direction: column; gap: 2px; }
+.lvl { display: flex; align-items: center; gap: 10px; height: 34px; }
+.lvl .nm { flex: 1; min-width: 0; font-size: .85rem; color: var(--ink-soft); white-space: nowrap; }
+.lvl .sh { width: 76px; height: 100%; flex: none; background: #1c6f86; }
+.lvl.me .sh { background: var(--sun); }
+.lvl.me .nm { color: var(--sun); font-weight: 700; }
+.lvl.prey .sh { background: var(--reefgreen); }
+.lvl.prey .nm { color: #8fe6d3; }
+.lvl.pred .sh { background: var(--coral); }
+.lvl.pred .nm { color: #ff9a8c; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: .75rem; color: var(--ink-soft); }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-inline-end: 5px; vertical-align: -1px; }
+@media (max-width: 760px) { .pyr { max-width: 340px; width: 100%; margin-inline: auto; } }
+</style>
+
+<main class="app" id="app" dir="rtl" lang="ar">
+  <header class="top">
+    <div>
+      <h1 data-i="title">هرم الشعاب</h1>
+      <p class="tag" data-i="tag">كُل الأصغر، واهرب من الأكبر</p>
+    </div>
+    <div class="tools">
+      <button class="chip" id="bLang" type="button">English</button>
+      <button class="chip" id="bPause" type="button">إيقاف مؤقت</button>
+      <button class="chip" id="bSound" type="button">الصوت: يعمل</button>
+    </div>
+  </header>
+
+  <section class="hud">
+    <div class="stat"><span class="k" data-i="kScore">النقاط</span><span class="v" id="hScore">0</span></div>
+    <div class="stat"><span class="k" data-i="kLives">المحاولات</span><span class="v" id="hLives"></span></div>
+    <div class="stat"><span class="k" data-i="kProg">التقدم نحو المستوى التالي</span><div class="bar"><i id="hBar"></i></div></div>
+    <div class="stat"><span class="k" data-i="kYou">أنت الآن</span><span class="v" id="hName">الأنثياس</span></div>
+  </section>
+
+  <div class="play">
+    <div class="stage" id="stage">
+      <canvas id="cv" width="960" height="540" role="img" aria-label="منطقة اللعب: سمكة صغيرة تأكل الأسماك الأصغر منها وتهرب من الأكبر بين الشعاب المرجانية"></canvas>
+      <div class="toast" id="toast" hidden></div>
+      <div class="panel" id="panel"></div>
+    </div>
+    <aside class="pyr" id="pyrBox" aria-label="الهرم الغذائي">
+      <h2 data-i="pyr">الهرم الغذائي</h2>
+      <div class="lvls" id="lvls"></div>
+      <div class="legend">
+        <span><i style="background:var(--sun)"></i><span data-i="lgMe">أنت</span></span>
+        <span><i style="background:var(--reefgreen)"></i><span data-i="lgPrey">تأكله</span></span>
+        <span><i style="background:var(--coral)"></i><span data-i="lgPred">يأكلك</span></span>
+      </div>
+    </aside>
+  </div>
+  <p class="hint" data-i="hint">الحركة: الماوس أو اللمس أو الأسهم وأزرار WASD. الهالة الحمراء تعني سمكة أكبر منك. زر P يوقف اللعبة مؤقتًا.</p>
+</main>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const cv = $('cv'), ctx = cv.getContext('2d'), stage = $('stage'), panel = $('panel'), toast = $('toast');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const rnd = (a, b) => a + Math.random() * (b - a);
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+  // Food pyramid, bottom (0) to top (5). r = radius, L/H = body proportions, sp = swim speed range.
+  const TIER = [
+    { n: 'العوالق', s: 'العوالق', ne: 'Plankton', se: 'Plankton', r: 5, pts: 1, col: '#9ff5df' },
+    { n: 'سمكة الأنثياس', s: 'الأنثياس', ne: 'Red Sea anthias', se: 'Anthias', r: 12, pts: 3, L: 1.35, H: .62, col: '#ff9a5c', sp: [70, 110] },
+    { n: 'سمكة الدمسل', s: 'الدمسل', ne: 'Damselfish', se: 'Damselfish', r: 17, pts: 6, L: 1.15, H: .78, col: '#3fc7b0', sp: [80, 120] },
+    { n: 'سمكة الهامور', s: 'الهامور', ne: 'Grouper', se: 'Grouper', r: 24, pts: 12, L: 1.4, H: .8, col: '#c25a42', sp: [85, 125] },
+    { n: 'سمكة الباراكودا', s: 'الباراكودا', ne: 'Barracuda', se: 'Barracuda', r: 28, pts: 24, L: 2.0, H: .36, col: '#a9bcc6', sp: [110, 150] },
+    { n: 'القرش الشعابي', s: 'القرش', ne: 'Reef shark', se: 'Shark', r: 40, pts: 0, L: 1.8, H: .55, col: '#7d8d99', sp: [100, 140] }
+  ];
+  const START = [0, 0, 12, 36, 80, 150];   // points needed to reach stage 1..5
+  const WIN = 240;
+
+  // ---------- canvas + scene ----------
+  let W = 960, H = 540, DPR = 1, floorY = 470, bgCv = null, rays = [];
+  function setupCanvas() {
+    const portrait = stage.clientWidth > 0 && stage.clientWidth < 640;
+    W = portrait ? 540 : 960; H = portrait ? 720 : 540;
+    DPR = Math.min(2, window.devicePixelRatio || 1);
+    cv.width = W * DPR; cv.height = H * DPR;
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    floorY = H - 70;
+    rays = Array.from({ length: 5 }, () => ({ x: rnd(0, W), w: rnd(60, 140), sp: rnd(6, 14), a: rnd(.05, .1) }));
+    renderBg();
+  }
+  function branch(g, x, y, len, ang, depth, w, col) {
+    const x2 = x + Math.cos(ang) * len, y2 = y + Math.sin(ang) * len;
+    g.strokeStyle = col; g.lineWidth = w; g.lineCap = 'round';
+    g.beginPath(); g.moveTo(x, y); g.lineTo(x2, y2); g.stroke();
+    if (depth > 0) {
+      branch(g, x2, y2, len * .72, ang - rnd(.35, .6), depth - 1, w * .75, col);
+      branch(g, x2, y2, len * .72, ang + rnd(.35, .6), depth - 1, w * .75, col);
+      if (Math.random() < .5) branch(g, x2, y2, len * .6, ang + rnd(-.15, .15), depth - 1, w * .7, col);
+    }
+  }
+  function renderBg() {
+    bgCv = document.createElement('canvas');
+    bgCv.width = W * DPR; bgCv.height = H * DPR;
+    const g = bgCv.getContext('2d');
+    g.setTransform(DPR, 0, 0, DPR, 0, 0);
+    const wg = g.createLinearGradient(0, 0, 0, H);
+    wg.addColorStop(0, '#2aa3b0'); wg.addColorStop(.45, '#0f5d78'); wg.addColorStop(1, '#04202e');
+    g.fillStyle = wg; g.fillRect(0, 0, W, H);
+    g.fillStyle = 'rgba(4,32,46,.35)';
+    for (let x = -20; x < W; x += rnd(70, 130)) {
+      g.beginPath(); g.ellipse(x, floorY + 10, rnd(70, 140), rnd(50, 120), 0, Math.PI, 0); g.fill();
+    }
+    const sg = g.createLinearGradient(0, floorY - 10, 0, H);
+    sg.addColorStop(0, '#c9a46b'); sg.addColorStop(1, '#7f6139');
+    g.fillStyle = sg; g.beginPath(); g.moveTo(0, floorY + 8);
+    for (let x = 0; x <= W; x += 30) g.lineTo(x, floorY + 8 + Math.sin(x * .03) * 6);
+    g.lineTo(W, H); g.lineTo(0, H); g.closePath(); g.fill();
+    const cols = ['#ff6b57', '#e84a7f', '#ffc857', '#b66dff', '#ff9a5c'];
+    for (let x = 12; x < W; x += rnd(34, 74)) {
+      const col = cols[(Math.random() * cols.length) | 0];
+      if (Math.random() < .65) {
+        branch(g, x, floorY + 12, rnd(34, 62), -Math.PI / 2 + rnd(-.3, .3), 3, rnd(5, 8), col);
+      } else {
+        const r = rnd(22, 40);
+        g.fillStyle = col; g.beginPath(); g.ellipse(x, floorY + 14, r, r * .75, 0, Math.PI, 0); g.fill();
+        g.strokeStyle = 'rgba(0,0,0,.18)'; g.lineWidth = 2;
+        for (let k = 1; k <= 3; k++) { g.beginPath(); g.ellipse(x, floorY + 14, r * k / 3.4, r * .75 * k / 3.4, 0, Math.PI, 0); g.stroke(); }
+      }
+    }
+  }
+
+  // ---------- state ----------
+  const P = { x: 0, y: 0, tx: 0, ty: 0, r: 12, face: 1, inv: 0, pulse: 0 };
+  let S = { pts: 0, stage: 1, lives: 3 };
+  let state = 'menu', T = 0, spawnT = 0, bubT = 0, shake = 0, toastTimer = 0;
+  let fish = [], parts = [], bubbles = [];
+  const keys = {};
+
+  function playerR() {
+    const s = S.stage, a = TIER[s].r, b = s < 5 ? TIER[s + 1].r * .92 : TIER[5].r * 1.2;
+    const end = s < 5 ? START[s + 1] : WIN;
+    return a + (b - a) * clamp((S.pts - START[s]) / (end - START[s]), 0, 1);
+  }
+  const canEat = t => t < S.stage && t >= S.stage - 2;
+
+  // ---------- language (Arabic / English) ----------
+  let lang = 'ar';
+  try { if (localStorage.getItem('rsp-lang') === 'en') lang = 'en'; } catch (e) { /* storage is optional */ }
+  const STR = {
+    ar: {
+      tag: 'كُل الأصغر، واهرب من الأكبر', title: 'هرم الشعاب',
+      pause: 'إيقاف مؤقت', resume: 'استئناف', soundOn: 'الصوت: يعمل', soundOff: 'الصوت: مكتوم',
+      kScore: 'النقاط', kLives: 'المحاولات', kProg: 'التقدم نحو المستوى التالي', kYou: 'أنت الآن',
+      pyr: 'الهرم الغذائي', lgMe: 'أنت', lgPrey: 'تأكله', lgPred: 'يأكلك',
+      hint: 'الحركة: الماوس أو اللمس أو الأسهم وأزرار WASD. الهالة الحمراء تعني سمكة أكبر منك. زر P يوقف اللعبة مؤقتًا.',
+      canvasAria: 'منطقة اللعب: سمكة صغيرة تأكل الأسماك الأصغر منها وتهرب من الأكبر بين الشعاب المرجانية',
+      livesAria: 'المحاولات المتبقية: ', you: 'أنت', and: ' و',
+      toast: (n, p) => `أصبحت ${n}. الآن تستطيع أكل ${p}`,
+      menuEyebrow: 'لعبة عن الهرم الغذائي في البحر الأحمر',
+      menuP: 'في شعاب البحر الأحمر تأكل كل سمكة ما هو أصغر منها. أنت سمكة أنثياس صغيرة في أسفل الهرم. كُل الأصغر منك لتكبر، وابتعد عن الأكبر حتى لا يأكلك.',
+      dtMove: 'الحركة', ddMove: 'الماوس أو اللمس أو الأسهم', dtEat: 'كُل', ddEat: 'العوالق والأسماك الأصغر منك',
+      dtAvoid: 'تجنّب', ddAvoid: 'كل سمكة تحيط بها هالة حمراء', dtGoal: 'الهدف', ddGoal: 'اصعد الهرم حتى تصبح قرشًا شعابيًا',
+      start: 'ابدأ اللعب', pausedH: 'متوقف مؤقتًا', pausedP: 'اضغط استئناف للعودة إلى الشعاب.',
+      eyWin: 'أحسنت', eyLose: 'انتهت الرحلة', hWin: 'وصلت إلى قمة الهرم', hLose: 'حاول مرة أخرى',
+      reasonWin: 'أصبحت قرشًا شعابيًا بعد أن مررت بكل مستويات الهرم الغذائي.',
+      reasonLose: 'أكلتك سمكة أكبر منك. في الهرم الغذائي يأكل كل مستوى ما دونه.',
+      stScore: 'النقاط', stLevel: 'أعلى مستوى وصلت إليه', recall: 'تذكّر عن الهرم الغذائي',
+      r1: 'العوالق في قاعدة الهرم، وعليها تعيش الأسماك الصغيرة.',
+      r2: 'كلما صعدنا إلى أعلى قلّ العدد وكبر الحجم، فالقروش أقل بكثير من الأنثياس.',
+      r3: 'ينتقل نحو 10% تقريبًا من الطاقة من مستوى إلى المستوى الذي فوقه، ولهذا لا يتسع الهرم لعدد كبير من المفترسات.',
+      again: 'العب مرة أخرى'
+    },
+    en: {
+      tag: 'Eat the smaller, flee the bigger', title: 'Reef Pyramid',
+      pause: 'Pause', resume: 'Resume', soundOn: 'Sound: on', soundOff: 'Sound: off',
+      kScore: 'Score', kLives: 'Lives', kProg: 'Progress to next level', kYou: 'You are now',
+      pyr: 'Food pyramid', lgMe: 'You', lgPrey: 'You eat', lgPred: 'Eats you',
+      hint: 'Move: mouse, touch, or arrow keys / WASD. A red halo means a fish bigger than you. Press P to pause.',
+      canvasAria: 'Play area: a small fish eats smaller fish and flees bigger ones among the coral reef',
+      livesAria: 'Lives left: ', you: 'You', and: ' and ',
+      toast: (n, p) => `You evolved into: ${n}. You can now eat: ${p}.`,
+      menuEyebrow: 'A game about the Red Sea food pyramid',
+      menuP: 'On Red Sea reefs, each fish eats what is smaller than itself. You are a small anthias at the bottom of the pyramid. Eat the smaller fish to grow, and stay away from bigger ones so they do not eat you.',
+      dtMove: 'Move', ddMove: 'Mouse, touch or arrow keys', dtEat: 'Eat', ddEat: 'Plankton and fish smaller than you',
+      dtAvoid: 'Avoid', ddAvoid: 'Any fish with a red halo', dtGoal: 'Goal', ddGoal: 'Climb the pyramid until you become a reef shark',
+      start: 'Start playing', pausedH: 'Paused', pausedP: 'Press resume to go back to the reef.',
+      eyWin: 'Well done', eyLose: 'Trip over', hWin: 'You reached the top of the pyramid', hLose: 'Try again',
+      reasonWin: 'You became a reef shark after passing through every level of the food pyramid.',
+      reasonLose: 'A bigger fish ate you. In the food pyramid, each level eats the one below it.',
+      stScore: 'Score', stLevel: 'Highest level reached', recall: 'Remember about the food pyramid',
+      r1: 'Plankton sits at the base of the pyramid, and small fish live on it.',
+      r2: 'The higher you go, the fewer and bigger the animals. There are far fewer sharks than anthias.',
+      r3: 'Roughly 10% of the energy passes from one level to the one above, which is why the top can only hold a few predators.',
+      again: 'Play again'
+    }
+  };
+  const L = (k, ...a) => { const v = STR[lang][k]; return typeof v === 'function' ? v(...a) : v; };
+  const sn = t => (lang === 'ar' ? TIER[t].s : TIER[t].se);
+  const fn = t => (lang === 'ar' ? TIER[t].n : TIER[t].ne);
+
+  // ---------- audio ----------
+  let actx = null, muted = false;
+  function beep(f, d, type, v, slide) {
+    if (muted) return;
+    try {
+      actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+      if (actx.state === 'suspended') actx.resume();
+      const t0 = actx.currentTime, o = actx.createOscillator(), g = actx.createGain();
+      o.type = type || 'sine'; o.frequency.setValueAtTime(f, t0);
+      if (slide) o.frequency.exponentialRampToValueAtTime(f * slide, t0 + d);
+      g.gain.setValueAtTime(v || .07, t0); g.gain.exponentialRampToValueAtTime(.0001, t0 + d);
+      o.connect(g); g.connect(actx.destination); o.start(t0); o.stop(t0 + d);
+    } catch (e) { /* audio is optional */ }
+  }
+
+  // ---------- HUD, pyramid, panels ----------
+  const heart = on => `<svg class="heart${on ? '' : ' off'}" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.5-9.2C1.2 8.6 3.2 5 6.6 5c2 0 3.5 1.1 5.4 3.3C13.9 6.1 15.4 5 17.4 5c3.4 0 5.4 3.6 4.1 6.8C19.5 16.4 12 21 12 21z"/></svg>`;
+  (function buildPyramid() {
+    const bound = i => 10 + i * (90 / 6);
+    let html = '';
+    for (let row = 0; row < 6; row++) {
+      const t = 5 - row, top = bound(row), bot = bound(row + 1);
+      const clip = `polygon(${50 - top / 2}% 0, ${50 + top / 2}% 0, ${50 + bot / 2}% 100%, ${50 - bot / 2}% 100%)`;
+      html += `<div class="lvl" data-t="${t}"><span class="nm">${sn(t)}</span><span class="sh" style="clip-path:${clip}"></span></div>`;
+    }
+    $('lvls').innerHTML = html;
+  })();
+  function updateHud() {
+    $('hScore').textContent = S.pts;
+    $('hLives').innerHTML = [0, 1, 2].map(i => heart(i < S.lives)).join('');
+    $('hLives').setAttribute('aria-label', L('livesAria') + S.lives);
+    const end = S.stage < 5 ? START[S.stage + 1] : WIN;
+    $('hBar').style.width = clamp((S.pts - START[S.stage]) / (end - START[S.stage]) * 100, 0, 100) + '%';
+    $('hName').textContent = sn(S.stage);
+    document.querySelectorAll('.lvl').forEach(el => {
+      const t = +el.dataset.t;
+      el.classList.toggle('me', t === S.stage);
+      el.classList.toggle('prey', canEat(t));
+      el.classList.toggle('pred', t === S.stage + 1);
+    });
+  }
+  function showToast(msg) {
+    toast.textContent = msg; toast.hidden = false;
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => { toast.hidden = true; }, 3600);
+  }
+  function showPanel(html) {
+    panel.innerHTML = html; panel.hidden = false;
+    const b = panel.querySelector('[data-act]');
+    if (b) { try { b.focus({ preventScroll: true }); } catch (e) { /* ignore */ } }
+  }
+  const hidePanel = () => { panel.hidden = true; panel.innerHTML = ''; };
+
+  function menuPanel() {
+    showPanel(`<div class="card">
+      <p class="eyebrow">${L('menuEyebrow')}</p>
+      <h2>${L('title')}</h2>
+      <p>${L('menuP')}</p>
+      <dl class="how">
+        <div><dt>${L('dtMove')}</dt><dd>${L('ddMove')}</dd></div>
+        <div><dt>${L('dtEat')}</dt><dd>${L('ddEat')}</dd></div>
+        <div><dt>${L('dtAvoid')}</dt><dd>${L('ddAvoid')}</dd></div>
+        <div><dt>${L('dtGoal')}</dt><dd>${L('ddGoal')}</dd></div>
+      </dl>
+      <button class="btn" type="button" data-act="start">${L('start')}</button>
+    </div>`);
+  }
+  function pausePanel() {
+    showPanel(`<div class="card"><h2>${L('pausedH')}</h2><p>${L('pausedP')}</p><button class="btn" type="button" data-act="resume">${L('resume')}</button></div>`);
+  }
+  const setPauseLabel = () => { $('bPause').textContent = state === 'pause' ? L('resume') : L('pause'); };
+  const setSoundLabel = () => { $('bSound').textContent = muted ? L('soundOff') : L('soundOn'); };
+  function renderPanel() {
+    if (state === 'menu') menuPanel();
+    else if (state === 'pause') pausePanel();
+    else if (state === 'over' || state === 'win') endPanel();
+  }
+  function applyLang() {
+    const app = $('app');
+    app.dir = lang === 'ar' ? 'rtl' : 'ltr'; app.lang = lang;
+    document.querySelectorAll('[data-i]').forEach(el => { el.textContent = L(el.dataset.i); });
+    $('bLang').textContent = lang === 'ar' ? 'English' : 'عربي';
+    cv.setAttribute('aria-label', L('canvasAria'));
+    $('pyrBox').setAttribute('aria-label', L('pyr'));
+    document.querySelectorAll('.lvl').forEach(el => { el.querySelector('.nm').textContent = sn(+el.dataset.t); });
+    setPauseLabel(); setSoundLabel();
+    toast.hidden = true;
+    updateHud(); renderPanel();
+  }
+  function endPanel() {
+    const win = state === 'win';
+    showPanel(`<div class="card">
+      <p class="eyebrow">${win ? L('eyWin') : L('eyLose')}</p>
+      <h2>${win ? L('hWin') : L('hLose')}</h2>
+      <p>${win ? L('reasonWin') : L('reasonLose')}</p>
+      <div class="endstats">
+        <div><span class="n">${S.pts}</span><span class="t">${L('stScore')}</span></div>
+        <div><span class="n">${sn(S.stage)}</span><span class="t">${L('stLevel')}</span></div>
+      </div>
+      <h3>${L('recall')}</h3>
+      <ul class="learned">
+        <li>${L('r1')}</li>
+        <li>${L('r2')}</li>
+        <li>${L('r3')}</li>
+      </ul>
+      <button class="btn" type="button" data-act="again">${L('again')}</button>
+    </div>`);
+  }
+
+  // ---------- flow ----------
+  function resetGame() {
+    setupCanvas();
+    S = { pts: 0, stage: 1, lives: 3 };
+    fish = []; parts = []; bubbles = [];
+    P.r = playerR(); P.x = P.tx = W / 2; P.y = P.ty = H * .4; P.inv = 0; P.pulse = 0; P.face = 1;
+    for (let i = 0; i < 16; i++) fish.push({ t: 0, x: rnd(20, W - 20), y: rnd(60, floorY - 20), vx: rnd(-14, 14), vy: rnd(-6, 6), r: 5, ph: rnd(0, 6) });
+    for (let i = 0; i < 4; i++) spawnFish(true);
+    spawnT = 1; shake = 0; toast.hidden = true;
+    updateHud();
+  }
+  function startGame() { resetGame(); state = 'play'; hidePanel(); beep(520, .15, 'sine', .06, 1.5); }
+  function endGame(win) {
+    state = win ? 'win' : 'over';
+    if (win) [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => beep(f, .18, 'triangle', .07), i * 120));
+    else beep(180, .5, 'sawtooth', .06, .5);
+    endPanel();
+  }
+  function pause() {
+    if (state !== 'play') return;
+    state = 'pause'; setPauseLabel(); pausePanel();
+  }
+  function resume() {
+    if (state !== 'pause') return;
+    state = 'play'; setPauseLabel(); hidePanel();
+  }
+  panel.addEventListener('click', e => {
+    const b = e.target.closest('[data-act]'); if (!b) return;
+    const a = b.dataset.act;
+    if (a === 'start' || a === 'again') startGame(); else if (a === 'resume') resume();
+  });
+  $('bPause').addEventListener('click', () => { state === 'play' ? pause() : resume(); });
+  $('bSound').addEventListener('click', () => {
+    muted = !muted; setSoundLabel();
+    if (!muted) beep(660, .08, 'sine', .05);
+  });
+  $('bLang').addEventListener('click', () => {
+    lang = lang === 'ar' ? 'en' : 'ar';
+    try { localStorage.setItem('rsp-lang', lang); } catch (e) { /* storage is optional */ }
+    applyLang();
+  });
+  document.addEventListener('visibilitychange', () => { if (document.hidden) pause(); });
+
+  // ---------- input ----------
+  const KM = { ArrowLeft: 'left', KeyA: 'left', ArrowRight: 'right', KeyD: 'right', ArrowUp: 'up', KeyW: 'up', ArrowDown: 'down', KeyS: 'down' };
+  addEventListener('keydown', e => {
+    if (e.code === 'KeyP') { state === 'play' ? pause() : resume(); return; }
+    const k = KM[e.code];
+    if (k) { keys[k] = true; if (state === 'play') e.preventDefault(); }
+  });
+  addEventListener('keyup', e => { const k = KM[e.code]; if (k) keys[k] = false; });
+  function aim(e) {
+    const r = cv.getBoundingClientRect(), k = W / r.width;
+    P.tx = (e.clientX - r.left) * k;
+    P.ty = (e.clientY - r.top) * k - (e.pointerType === 'touch' ? 50 * k : 0);
+  }
+  cv.addEventListener('pointermove', e => { if (e.pointerType === 'mouse' || e.buttons) aim(e); });
+  cv.addEventListener('pointerdown', e => { aim(e); try { cv.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ } });
+
+  // ---------- spawning ----------
+  function spawnFish(initial) {
+    const s = S.stage, roll = Math.random();
+    const lo = Math.max(1, s - 2), hi = s - 1;
+    let t;
+    if (roll < .55 && hi >= 1) t = lo + ((Math.random() * (hi - lo + 1)) | 0);
+    else if (roll < .75) t = s;
+    else t = Math.min(5, s + 1);
+    const preds = fish.filter(f => f.t > s).length;
+    if (t > s && (initial || preds >= 2)) t = s;
+    const sp = TIER[t].sp, dir = Math.random() < .5 ? 1 : -1, speed = rnd(sp[0], sp[1]);
+    let x, y;
+    if (initial) {
+      for (let i = 0; i < 12; i++) { x = rnd(60, W - 60); y = rnd(80, floorY - 50); if (Math.hypot(x - P.x, y - P.y) > 170) break; }
+    } else { x = dir > 0 ? -90 : W + 90; y = rnd(70, floorY - 40); }
+    fish.push({ t, x, y, vx: dir * speed, vy: 0, r: TIER[t].r, ph: rnd(0, 6) });
+  }
+  const pop = (x, y, txt, col) => parts.push({ x, y, t: 0, txt, col });
+
+  // ---------- events ----------
+  function eat(f) {
+    f.dead = true; P.pulse = 1;
+    const gain = TIER[f.t].pts;
+    S.pts += gain; pop(f.x, f.y, '+' + gain, '#ffc857');
+    beep(420 + f.t * 90, .1, 'sine', .07, 1.6);
+    for (let i = 0; i < 5; i++) bubbles.push({ x: f.x + rnd(-8, 8), y: f.y + rnd(-6, 6), r: rnd(2, 4), v: rnd(40, 80), ph: rnd(0, 6) });
+    while (S.stage < 5 && S.pts >= START[S.stage + 1]) {
+      S.stage++;
+      const prey = [];
+      for (let t = Math.max(0, S.stage - 2); t < S.stage; t++) prey.push(sn(t));
+      showToast(L('toast', fn(S.stage), prey.join(L('and'))));
+      [523, 659, 784].forEach((fr, i) => setTimeout(() => beep(fr, .16, 'triangle', .07), i * 110));
+    }
+    updateHud();
+    if (S.stage === 5 && S.pts >= WIN) endGame(true);
+  }
+  function hit(f) {
+    S.lives--; P.inv = 1.8; shake = .3; beep(140, .25, 'sawtooth', .06, .6);
+    const dx = P.x - f.x, dy = P.y - f.y, d = Math.hypot(dx, dy) || 1;
+    P.tx = clamp(P.x + dx / d * 150, 24, W - 24); P.ty = clamp(P.y + dy / d * 150, 40, floorY - 8);
+    updateHud();
+    if (S.lives <= 0) endGame(false);
+  }
+
+  // ---------- update ----------
+  function updBubbles(dt) {
+    bubT -= dt;
+    if (bubT <= 0) { bubbles.push({ x: rnd(0, W), y: H + 10, r: rnd(1.5, 4), v: rnd(25, 55), ph: rnd(0, 6) }); bubT = rnd(.15, .4); }
+    for (const b of bubbles) { b.y -= b.v * dt; b.x += Math.sin(T * 2 + b.ph) * 8 * dt; }
+    bubbles = bubbles.filter(b => b.y > -10);
+  }
+  function updParts(dt) {
+    for (const p of parts) { p.t += dt; p.y -= 34 * dt; }
+    parts = parts.filter(p => p.t < 1);
+  }
+  function moveFish(dt) {
+    for (const f of fish) {
+      f.x += f.vx * dt; f.y += f.vy * dt;
+      if (f.t === 0) {
+        f.vy += Math.sin(T + f.ph) * 4 * dt;
+        if (f.x < -20) f.x = W + 20; else if (f.x > W + 20) f.x = -20;
+      } else {
+        f.y += Math.sin(T * 1.5 + f.ph) * 8 * dt;
+        if (f.t > S.stage && state === 'play') { f.vy += clamp(P.y - f.y, -1, 1) * 40 * dt; f.vy = clamp(f.vy, -70, 70); }
+      }
+      f.y = clamp(f.y, 40, floorY - 6);
+    }
+    fish = fish.filter(f => !f.dead && f.x > -260 && f.x < W + 260);
+  }
+  function movePlayer(dt) {
+    const ox = P.x;
+    P.x += (P.tx - P.x) * Math.min(1, 7 * dt);
+    P.y += (P.ty - P.y) * Math.min(1, 7 * dt);
+    if (Math.abs(P.x - ox) > .15) P.face = P.x > ox ? 1 : -1;
+    P.pulse = Math.max(0, P.pulse - dt * 4);
+  }
+  function idle(dt) {
+    T += dt; updBubbles(dt); updParts(dt); moveFish(dt);
+    if (state !== 'pause') {
+      P.tx = W / 2 + Math.sin(T * .6) * 120; P.ty = H * .4 + Math.sin(T * 1.1) * 14;
+      movePlayer(dt);
+    }
+    shake = Math.max(0, shake - dt);
+  }
+  function update(dt) {
+    T += dt;
+    const kx = (keys.right ? 1 : 0) - (keys.left ? 1 : 0), ky = (keys.down ? 1 : 0) - (keys.up ? 1 : 0);
+    if (kx || ky) { P.tx += kx * 340 * dt; P.ty += ky * 340 * dt; }
+    P.tx = clamp(P.tx, 24, W - 24); P.ty = clamp(P.ty, 40, floorY - 8);
+    movePlayer(dt);
+    P.r = playerR();
+    P.inv = Math.max(0, P.inv - dt); shake = Math.max(0, shake - dt);
+
+    spawnT -= dt;
+    if (spawnT <= 0) {
+      if (fish.filter(f => f.t > 0).length < 9) spawnFish(false);
+      spawnT = Math.max(.55, 1.0 - S.stage * .06) * rnd(.8, 1.2);
+    }
+    moveFish(dt);
+
+    for (const f of fish) {
+      if (f.dead || state !== 'play') continue;
+      const reach = f.r * .8 + P.r * .8 + (f.t <= 1 ? 5 : 0);
+      if (Math.hypot(f.x - P.x, f.y - P.y) >= reach) continue;
+      if (canEat(f.t)) eat(f);
+      else if (f.t > S.stage && P.inv <= 0) hit(f);
+    }
+    updBubbles(dt); updParts(dt);
+  }
+
+  // ---------- drawing ----------
+  function drawRays() {
+    for (const r of rays) {
+      const x = ((r.x + (reduce ? 0 : T * r.sp)) % (W + 240)) - 120;
+      const g = ctx.createLinearGradient(0, 0, 0, floorY);
+      g.addColorStop(0, `rgba(255,255,255,${r.a})`); g.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = g; ctx.beginPath();
+      ctx.moveTo(x, 0); ctx.lineTo(x + r.w, 0); ctx.lineTo(x + r.w - 90, floorY); ctx.lineTo(x - 90 - r.w * .3, floorY);
+      ctx.closePath(); ctx.fill();
+    }
+  }
+  function drawPlankton(f) {
+    ctx.globalAlpha = canEat(0) ? .95 : .35;
+    ctx.fillStyle = TIER[0].col;
+    const bob = Math.sin(T * 2 + f.ph) * 2;
+    for (const [dx, dy, rr] of [[0, 0, 3.2], [5, 3, 2.2], [-4, 4, 2.4]]) { ctx.beginPath(); ctx.arc(f.x + dx, f.y + dy + bob, rr, 0, 7); ctx.fill(); }
+    ctx.globalAlpha = 1;
+  }
+  function drawFish(x, y, t, r, dir, ph, isP) {
+    const d = TIER[t], L = r * d.L, Hh = r * d.H;
+    ctx.save(); ctx.translate(x, y); ctx.scale(dir, 1);
+    const wag = Math.sin(T * (t === 5 ? 4 : 9) + ph) * r * .25;
+    ctx.fillStyle = d.col;
+    ctx.beginPath(); ctx.moveTo(-L * .8, 0); ctx.lineTo(-L * 1.5, -Hh * .95 + wag); ctx.lineTo(-L * 1.5, Hh * .95 + wag); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(0, 0, L, Hh, 0, 0, 7); ctx.fill();
+    ctx.beginPath();
+    if (t === 5) { ctx.moveTo(-L * .1, -Hh * .8); ctx.lineTo(L * .2, -Hh * 2.1); ctx.lineTo(L * .5, -Hh * .8); }
+    else { ctx.moveTo(-L * .3, -Hh * .85); ctx.lineTo(L * .1, -Hh * 1.5); ctx.lineTo(L * .4, -Hh * .8); }
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = 'rgba(0,0,0,.16)'; ctx.beginPath(); ctx.ellipse(0, -Hh * .3, L * .95, Hh * .55, 0, 0, 7); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,.3)'; ctx.beginPath(); ctx.ellipse(L * .05, Hh * .5, L * .8, Hh * .38, 0, 0, 7); ctx.fill();
+    if (t === 3) { ctx.fillStyle = 'rgba(255,255,255,.55)'; for (const i of [-.45, 0, .4]) { ctx.beginPath(); ctx.arc(L * i, -Hh * .15, r * .1, 0, 7); ctx.fill(); } }
+    if (t === 5) { ctx.strokeStyle = 'rgba(4,32,46,.45)'; ctx.lineWidth = 1.5; for (const i of [.25, .38, .51]) { ctx.beginPath(); ctx.moveTo(L * i, -Hh * .35); ctx.lineTo(L * i - 3, Hh * .2); ctx.stroke(); } }
+    if (t === 4) { ctx.strokeStyle = 'rgba(4,32,46,.5)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(L * .95, Hh * .1); ctx.lineTo(L * .55, Hh * .22); ctx.stroke(); }
+    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(L * .6, -Hh * .2, Math.max(2.2, r * .13), 0, 7); ctx.fill();
+    ctx.fillStyle = '#04202e'; ctx.beginPath(); ctx.arc(L * .63, -Hh * .2, Math.max(1.1, r * .06), 0, 7); ctx.fill();
+    if (isP) { ctx.strokeStyle = '#ffc857'; ctx.lineWidth = 2.2; ctx.beginPath(); ctx.ellipse(0, 0, L, Hh, 0, 0, 7); ctx.stroke(); }
+    ctx.restore();
+  }
+  function draw() {
+    ctx.save();
+    if (shake > 0) ctx.translate(rnd(-4, 4), rnd(-4, 4));
+    ctx.drawImage(bgCv, 0, 0, W, H);
+    drawRays();
+    ctx.strokeStyle = 'rgba(230,245,243,.5)'; ctx.lineWidth = 1;
+    for (const b of bubbles) { ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, 7); ctx.stroke(); }
+    for (const f of fish) if (f.t === 0) drawPlankton(f);
+    for (const f of fish) {
+      if (f.t === 0) continue;
+      if (f.t > S.stage) {
+        ctx.strokeStyle = `rgba(255,107,87,${.4 + .2 * Math.sin(T * 6)})`; ctx.lineWidth = 2.5;
+        ctx.beginPath(); ctx.arc(f.x, f.y, f.r * 1.7, 0, 7); ctx.stroke();
+      }
+      drawFish(f.x, f.y, f.t, f.r, f.vx >= 0 ? 1 : -1, f.ph, false);
+    }
+    // player
+    if (P.inv <= 0 || Math.floor(P.inv * 10) % 2 === 1) {
+      const pr = P.r * (1 + P.pulse * .25);
+      ctx.strokeStyle = 'rgba(255,200,87,.3)'; ctx.lineWidth = 1.5; ctx.setLineDash([4, 6]);
+      ctx.beginPath(); ctx.arc(P.x, P.y, pr * 1.6, 0, 7); ctx.stroke(); ctx.setLineDash([]);
+      drawFish(P.x, P.y, S.stage, pr, P.face, 0, true);
+      ctx.font = '700 14px Tajawal, sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#ffc857';
+      ctx.fillText(L('you'), P.x, P.y - pr * 1.9);
+    }
+    ctx.font = '700 20px Tajawal, sans-serif'; ctx.textAlign = 'center';
+    for (const p of parts) { ctx.globalAlpha = 1 - p.t; ctx.fillStyle = p.col; ctx.fillText(p.txt, p.x, p.y); }
+    ctx.globalAlpha = 1;
+    ctx.restore();
+  }
+
+  // ---------- loop ----------
+  let last = performance.now();
+  function frame(now) {
+    const dt = Math.min(.05, (now - last) / 1000); last = now;
+    if (state === 'play') update(dt); else idle(dt);
+    draw();
+    requestAnimationFrame(frame);
+  }
+  let rt = 0;
+  addEventListener('resize', () => {
+    clearTimeout(rt);
+    rt = setTimeout(() => { if (state !== 'play' && state !== 'pause') setupCanvas(); }, 200);
+  });
+
+  resetGame();
+  applyLang();
+  requestAnimationFrame(frame);
+})();
+</script>
+
+</body></html>

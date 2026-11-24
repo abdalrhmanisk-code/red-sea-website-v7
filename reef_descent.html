@@ -1,0 +1,2430 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>أعماق الشعاب | Reef Descent</title>
+  <style>
+    /* ==========================================================================
+       CSS VARIABLES & BASE RESET
+       ========================================================================== */
+    :root {
+      --font-ar: system-ui, -apple-system, "Segoe UI", Tahoma, "Noto Sans Arabic", Arial, sans-serif;
+      --font-en: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --glass-bg: rgba(7, 25, 42, 0.72);
+      --glass-border: rgba(125, 226, 255, 0.28);
+      --accent-cyan: #38bdf8;
+      --accent-teal: #2dd4bf;
+      --accent-gold: #fbbf24;
+      --accent-red: #f43f5e;
+      --text-main: #f8fafc;
+      --text-muted: #cbd5e1;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: none;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #03111f;
+      color: var(--text-main);
+      font-family: var(--font-ar);
+    }
+
+    html[dir="ltr"] body {
+      font-family: var(--font-en);
+    }
+
+    /* ==========================================================================
+       GAME CONTAINER & CANVAS
+       ========================================================================== */
+    #game-wrapper {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #gameCanvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      cursor: ew-resize;
+    }
+
+    /* ==========================================================================
+       HUD (HEADS-UP DISPLAY)
+       ========================================================================== */
+    #hud {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: 14px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .hud-top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .hud-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .hud-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid var(--glass-border);
+      border-radius: 14px;
+      padding: 8px 14px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .stat-block {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+    }
+
+    .stat-label {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+
+    .stat-value {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #fff;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .stat-value.highlight-gold {
+      color: var(--accent-gold);
+    }
+
+    .stat-value.highlight-cyan {
+      color: var(--accent-cyan);
+    }
+
+    /* Hearts / Lives */
+    .hearts-container {
+      display: flex;
+      gap: 4px;
+      font-size: 1.25rem;
+    }
+
+    .heart {
+      transition: transform 0.25s ease, opacity 0.25s ease, filter 0.25s ease;
+    }
+
+    .heart.lost {
+      opacity: 0.25;
+      filter: grayscale(100%);
+      transform: scale(0.82);
+    }
+
+    /* Combo Badge */
+    #combo-badge {
+      background: linear-gradient(135deg, #f59e0b, #ea580c);
+      color: #fff;
+      font-weight: 900;
+      font-size: 0.95rem;
+      padding: 4px 10px;
+      border-radius: 999px;
+      box-shadow: 0 0 14px rgba(245, 158, 11, 0.65);
+      transform: scale(0.9);
+      opacity: 0;
+      transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    #combo-badge.active {
+      opacity: 1;
+      transform: scale(1.05);
+    }
+
+    /* Oxygen Gauge */
+    .oxygen-card {
+      min-width: 170px;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 5px;
+    }
+
+    .oxygen-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
+    .oxygen-track {
+      width: 100%;
+      height: 10px;
+      background: rgba(15, 23, 42, 0.85);
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+    }
+
+    #oxygen-fill {
+      height: 100%;
+      width: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #06b6d4, #38bdf8, #a5f3fc);
+      transition: width 0.1s linear, background 0.3s ease;
+    }
+
+    #oxygen-fill.low {
+      background: linear-gradient(90deg, #e11d48, #fb7185);
+      animation: pulseOxygen 0.6s infinite alternate;
+    }
+
+    @keyframes pulseOxygen {
+      from { opacity: 0.7; }
+      to { opacity: 1; box-shadow: 0 0 12px #f43f5e; }
+    }
+
+    /* Zone Pill & Controls */
+    .zone-pill {
+      background: rgba(14, 116, 144, 0.45);
+      border: 1px solid rgba(103, 232, 249, 0.4);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: #cffafe;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .hud-btn {
+      pointer-events: auto;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      color: #fff;
+      border-radius: 12px;
+      padding: 8px 12px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+      transition: transform 0.15s ease, background 0.2s ease, border-color 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .hud-btn:hover {
+      background: rgba(56, 189, 248, 0.24);
+      border-color: var(--accent-cyan);
+      transform: translateY(-1px);
+    }
+
+    .hud-btn:active {
+      transform: scale(0.95);
+    }
+
+    /* ==========================================================================
+       OVERLAYS (START SCREEN, PAUSE, END SCREEN)
+       ========================================================================== */
+    .overlay {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at center, rgba(6, 28, 48, 0.82), rgba(2, 11, 22, 0.94));
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      z-index: 25;
+      overflow-y: auto;
+      transition: opacity 0.3s ease;
+    }
+
+    .overlay.hidden {
+      display: none;
+    }
+
+    .modal-card {
+      width: 100%;
+      max-width: 720px;
+      background: linear-gradient(165deg, rgba(12, 38, 64, 0.92), rgba(6, 20, 36, 0.96));
+      border: 1px solid rgba(125, 226, 255, 0.32);
+      border-radius: 24px;
+      padding: 26px 28px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+      text-align: center;
+      max-height: 94vh;
+      overflow-y: auto;
+      pointer-events: auto;
+    }
+
+    .modal-top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .badge-tag {
+      background: rgba(45, 212, 191, 0.16);
+      border: 1px solid rgba(45, 212, 191, 0.45);
+      color: #5eead4;
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 999px;
+    }
+
+    .game-title {
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      font-weight: 900;
+      background: linear-gradient(135deg, #ffffff 10%, #7dd3fc 55%, #2dd4bf 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+      line-height: 1.25;
+    }
+
+    .game-subtitle {
+      color: var(--text-muted);
+      font-size: 0.98rem;
+      line-height: 1.6;
+      max-width: 560px;
+      margin: 0 auto 20px;
+    }
+
+    /* How to play grid */
+    .guide-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+      gap: 10px;
+      margin-bottom: 22px;
+      text-align: start;
+    }
+
+    .guide-item {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .guide-icon {
+      font-size: 1.4rem;
+    }
+
+    .guide-title {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: #e0f2fe;
+    }
+
+    .guide-desc {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* Primary Action Button */
+    .btn-primary {
+      background: linear-gradient(135deg, #0284c7, #0d9488);
+      color: #fff;
+      border: none;
+      border-radius: 16px;
+      padding: 14px 34px;
+      font-size: 1.1rem;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 10px 25px rgba(13, 148, 136, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+      transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 14px 32px rgba(56, 189, 248, 0.55);
+      filter: brightness(1.08);
+    }
+
+    .btn-primary:active {
+      transform: scale(0.97);
+    }
+
+    /* End Screen Summary Stats */
+    .summary-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin: 18px 0;
+    }
+
+    .summary-box {
+      background: rgba(15, 23, 42, 0.65);
+      border: 1px solid rgba(125, 226, 255, 0.22);
+      border-radius: 16px;
+      padding: 12px 10px;
+    }
+
+    .summary-box .s-label {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .summary-box .s-val {
+      font-size: 1.4rem;
+      font-weight: 900;
+      color: #fff;
+    }
+
+    .summary-box.gold .s-val {
+      color: var(--accent-gold);
+    }
+
+    .summary-box.cyan .s-val {
+      color: var(--accent-cyan);
+    }
+
+    /* Conservation Cards */
+    .edu-section-title {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #5eead4;
+      margin: 18px 0 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .edu-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(195px, 1fr));
+      gap: 12px;
+      margin-bottom: 22px;
+      text-align: start;
+    }
+
+    .edu-card {
+      background: linear-gradient(180deg, rgba(20, 56, 88, 0.55), rgba(10, 30, 50, 0.75));
+      border: 1px solid rgba(94, 234, 212, 0.24);
+      border-radius: 16px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .edu-card-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 800;
+      font-size: 0.9rem;
+      color: #e0f2fe;
+    }
+
+    .edu-card p {
+      font-size: 0.8rem;
+      color: #cbd5e1;
+      line-height: 1.5;
+    }
+
+    .end-status-banner {
+      display: inline-block;
+      padding: 6px 16px;
+      border-radius: 999px;
+      font-weight: 800;
+      font-size: 0.88rem;
+      margin-bottom: 8px;
+    }
+
+    .end-status-banner.win {
+      background: rgba(16, 185, 129, 0.2);
+      border: 1px solid #10b981;
+      color: #6ee7b7;
+    }
+
+    .end-status-banner.lose {
+      background: rgba(244, 63, 94, 0.2);
+      border: 1px solid #f43f5e;
+      color: #fda4af;
+    }
+
+    /* Responsive tweaks */
+    @media (max-width: 600px) {
+      #hud {
+        padding: 10px 10px;
+      }
+      .hud-card {
+        padding: 6px 10px;
+        border-radius: 11px;
+      }
+      .stat-value {
+        font-size: 1rem;
+      }
+      .oxygen-card {
+        min-width: 135px;
+      }
+      .modal-card {
+        padding: 18px 16px;
+      }
+      .summary-stats {
+        gap: 8px;
+      }
+      .summary-box .s-val {
+        font-size: 1.15rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="game-wrapper">
+    <!-- Main HTML5 2D Game Canvas -->
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- Top Gameplay HUD -->
+    <div id="hud">
+      <div class="hud-top-row">
+        <!-- Left/Start Group: Depth, Score, Combo -->
+        <div class="hud-group">
+          <div class="hud-card">
+            <div class="stat-block">
+              <span class="stat-label" data-i18n="depthLabel">العمق</span>
+              <span class="stat-value highlight-cyan" id="hud-depth">0.0m</span>
+            </div>
+          </div>
+
+          <div class="hud-card">
+            <div class="stat-block">
+              <span class="stat-label" data-i18n="scoreLabel">النقاط</span>
+              <span class="stat-value highlight-gold" id="hud-score">0</span>
+            </div>
+            <div id="combo-badge">x1</div>
+          </div>
+
+          <div class="zone-pill" id="hud-zone">
+            <span>☀️</span>
+            <span id="hud-zone-text">الشعاب الضحلة (0-35م)</span>
+          </div>
+        </div>
+
+        <!-- Right/End Group: Lives, Oxygen, Controls -->
+        <div class="hud-group">
+          <div class="hud-card">
+            <div class="hearts-container" id="hud-hearts" aria-label="Lives">
+              <span class="heart">❤️</span>
+              <span class="heart">❤️</span>
+              <span class="heart">❤️</span>
+            </div>
+          </div>
+
+          <div class="hud-card oxygen-card">
+            <div class="oxygen-header">
+              <span data-i18n="oxygenLabel">الأكسجين O₂</span>
+              <span id="hud-oxygen-pct">100%</span>
+            </div>
+            <div class="oxygen-track">
+              <div id="oxygen-fill"></div>
+            </div>
+          </div>
+
+          <button class="hud-btn" id="btn-sound" title="Sound Toggle" aria-label="Toggle Sound">🔊</button>
+          <button class="hud-btn" id="btn-pause" title="Pause" aria-label="Pause Game">⏸️</button>
+          <button class="hud-btn" id="btn-lang-hud">EN</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- START SCREEN OVERLAY -->
+    <div class="overlay" id="start-overlay">
+      <div class="modal-card">
+        <div class="modal-top-bar">
+          <span class="badge-tag" data-i18n="missionTag">مهمة حماية المحيطات • 0m → 100m</span>
+          <button class="hud-btn" id="btn-lang-start">EN</button>
+        </div>
+
+        <h1 class="game-title" data-i18n="gameTitle">أعماق الشعاب</h1>
+        <p class="game-subtitle" data-i18n="gameSubtitle">
+          غُص في أعماق البحر الأحمر، نظّف الشعاب المرجانية من المخلفات البلاستيكية، وحافظ على مخزون الأكسجين حتى تصل إلى عمق 100 متر!
+        </p>
+
+        <div class="guide-grid">
+          <div class="guide-item">
+            <span class="guide-icon">🤿</span>
+            <span class="guide-title" data-i18n="guideMoveTitle">التحكم والحركة</span>
+            <span class="guide-desc" data-i18n="guideMoveDesc">الأسهم أو A / D، أو السحب بالماوس واللمس يميناً ويساراً.</span>
+          </div>
+          <div class="guide-item">
+            <span class="guide-icon">♻️</span>
+            <span class="guide-title" data-i18n="guideTrashTitle">تنظيف النفايات</span>
+            <span class="guide-desc" data-i18n="guideTrashDesc">اجمع الزجاجات والأكياس (+10) وضاعف النقاط بالتتالي (Combo).</span>
+          </div>
+          <div class="guide-item">
+            <span class="guide-icon">🫧</span>
+            <span class="guide-title" data-i18n="guideO2Title">فقاعات O₂</span>
+            <span class="guide-desc" data-i18n="guideO2Desc">التقط فقاعات الأكسجين الكبيرة لإعادة تعبئة خزان التنفس.</span>
+          </div>
+          <div class="guide-item">
+            <span class="guide-icon">⚠️</span>
+            <span class="guide-title" data-i18n="guideHazardTitle">تجنّب المخاطر</span>
+            <span class="guide-desc" data-i18n="guideHazardDesc">احذر قناديل البحر، الشباك المهجورة، وهجمات القرش السريعة!</span>
+          </div>
+        </div>
+
+        <button class="btn-primary" id="btn-start">
+          <span>🚀</span>
+          <span data-i18n="startBtn">ابدأ الغوص الآن</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- PAUSE OVERLAY -->
+    <div class="overlay hidden" id="pause-overlay">
+      <div class="modal-card" style="max-width: 420px;">
+        <h2 class="game-title" style="font-size: 2rem;" data-i18n="pausedTitle">اللعبة متوقفة مؤقتاً</h2>
+        <p class="game-subtitle" data-i18n="pausedSub">خذ نفساً عميقاً واستعد لمواصلة حماية الشعاب المرجانية.</p>
+        <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+          <button class="btn-primary" id="btn-resume" data-i18n="resumeBtn">استكمال الغوص ▶️</button>
+          <button class="hud-btn" id="btn-restart-pause" style="padding: 14px 20px; font-size: 1rem;" data-i18n="restartBtn">إعادة المحاولة 🔄</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- END SCREEN OVERLAY (VICTORY / GAME OVER + CONSERVATION FACTS) -->
+    <div class="overlay hidden" id="end-overlay">
+      <div class="modal-card">
+        <div class="modal-top-bar">
+          <span class="end-status-banner win" id="end-badge">اكتملت المهمة!</span>
+          <button class="hud-btn" id="btn-lang-end">EN</button>
+        </div>
+
+        <h2 class="game-title" id="end-title">أحسنت يا بطل الأعماق!</h2>
+        <p class="game-subtitle" id="end-reason" style="margin-bottom: 10px;">
+          لقد وصلت بنجاح إلى عمق 100 متر وساهمت في إنقاذ البيئة البحرية.
+        </p>
+
+        <!-- Final Score, Reached Depth, Best Score -->
+        <div class="summary-stats">
+          <div class="summary-box gold">
+            <div class="s-label" data-i18n="finalScoreLabel">النتيجة النهائية</div>
+            <div class="s-val" id="end-score">0</div>
+          </div>
+          <div class="summary-box cyan">
+            <div class="s-label" data-i18n="reachedDepthLabel">العمق المُحقق</div>
+            <div class="s-val" id="end-depth">0m</div>
+          </div>
+          <div class="summary-box">
+            <div class="s-label" data-i18n="bestScoreLabel">أعلى نتيجة محفوظة</div>
+            <div class="s-val" id="end-best">0</div>
+          </div>
+        </div>
+
+        <!-- 3 Marine Conservation Educational Cards -->
+        <div class="edu-section-title">
+          <span>🌊</span>
+          <span data-i18n="eduHeading">حقائق بيئية لحماية محيطاتنا</span>
+        </div>
+
+        <div class="edu-grid">
+          <div class="edu-card">
+            <div class="edu-card-header">
+              <span>🧴</span>
+              <span data-i18n="fact1Title">التلوث البلاستيكي</span>
+            </div>
+            <p data-i18n="fact1Body">
+              يدخل ملايين الأطنان من البلاستيك إلى المحيطات سنوياً، حيث تبتلعها السلاحف والأسماك ظناً أنها غذاء، وتبقى لمئات السنين دون تحلل.
+            </p>
+          </div>
+
+          <div class="edu-card">
+            <div class="edu-card-header">
+              <span>🕸️</span>
+              <span data-i18n="fact2Title">شباك الصيد الشبحية</span>
+            </div>
+            <p data-i18n="fact2Body">
+              تُعد الشباك المهجورة في قاع البحر مصائد صامتة تواصل اصطياد الأسماك والدلافين وتدمير الشعاب المرجانية لعقود طويلة.
+            </p>
+          </div>
+
+          <div class="edu-card">
+            <div class="edu-card-header">
+              <span>🪸</span>
+              <span data-i18n="fact3Title">حماية الشعاب المرجانية</span>
+            </div>
+            <p data-i18n="fact3Body">
+              تأوي الشعاب المرجانية ربع الكائنات البحرية؛ تقليل النفايات وتجنب لمس الشعاب أثناء الغوص يساعدها على التعافي والازدهار.
+            </p>
+          </div>
+        </div>
+
+        <button class="btn-primary" id="btn-restart">
+          <span>🔄</span>
+          <span data-i18n="playAgainBtn">العب مرة أخرى</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * ============================================================================
+     * أعماق الشعاب / REEF DESCENT
+     * Single-File HTML5 Canvas 2D Arcade Game
+     * Features:
+     * - Multi-layer Parallax Ocean Background with Smooth Zone Color Interpolation
+     * - High-DPI (devicePixelRatio) Responsive Canvas Scaling
+     * - Bilingual Arabic (RTL) / English (LTR) Dynamic Localization
+     * - Web Audio API Procedural Sound Synthesizer (Zero external assets)
+     * - Fair Telegraphing for High-Speed Predators & Passable Ghost Nets
+     * - Persistent High Score & Best Depth via localStorage
+     * ============================================================================
+     */
+
+    (function () {
+      'use strict';
+
+      /* --------------------------------------------------------------------------
+         1. LOCALIZATION DICTIONARY (ARABIC & ENGLISH)
+         -------------------------------------------------------------------------- */
+      const I18N = {
+        ar: {
+          dir: 'rtl',
+          langBtn: 'EN',
+          gameTitle: 'أعماق الشعاب',
+          missionTag: 'مهمة حماية المحيطات • 0m → 100m',
+          gameSubtitle: 'غُص في أعماق البحر، نظّف الشعاب المرجانية من المخلفات البلاستيكية، وحافظ على مخزون الأكسجين حتى تصل إلى عمق 100 متر!',
+          guideMoveTitle: 'التحكم والحركة',
+          guideMoveDesc: 'الأسهم أو A / D، أو السحب بالماوس واللمس يميناً ويساراً.',
+          guideTrashTitle: 'تنظيف النفايات',
+          guideTrashDesc: 'اجمع الزجاجات والأكياس (+10) وضاعف النقاط بالتتالي (Combo).',
+          guideO2Title: 'فقاعات O₂',
+          guideO2Desc: 'التقط فقاعات الأكسجين الكبيرة لإعادة تعبئة خزان التنفس.',
+          guideHazardTitle: 'تجنّب المخاطر',
+          guideHazardDesc: 'احذر قناديل البحر، الشباك المهجورة، وهجمات القرش السريعة!',
+          startBtn: 'ابدأ الغوص الآن',
+          depthLabel: 'العمق',
+          scoreLabel: 'النقاط',
+          oxygenLabel: 'الأكسجين O₂',
+          zone1: 'الشعاب الضحلة (0-35م)',
+          zone2: 'المياه العميقة (35-70م)',
+          zone3: 'منطقة الشفق (70-100م)',
+          pausedTitle: 'اللعبة متوقفة مؤقتاً',
+          pausedSub: 'خذ نفساً عميقاً واستعد لمواصلة حماية الشعاب المرجانية.',
+          resumeBtn: 'استكمال الغوص ▶️',
+          restartBtn: 'إعادة المحاولة 🔄',
+          finalScoreLabel: 'النتيجة النهائية',
+          reachedDepthLabel: 'العمق المُحقق',
+          bestScoreLabel: 'أعلى نتيجة محفوظة',
+          eduHeading: 'حقائق بيئية لحماية محيطاتنا',
+          fact1Title: 'التلوث البلاستيكي',
+          fact1Body: 'يدخل ملايين الأطنان من البلاستيك إلى المحيطات سنوياً، حيث تبتلعها السلاحف والأسماك ظناً أنها غذاء، وتبقى لمئات السنين دون تحلل.',
+          fact2Title: 'شباك الصيد الشبحية',
+          fact2Body: 'تُعد الشباك المهجورة في قاع البحر مصائد صامتة تواصل اصطياد الأسماك والدلافين وتدمير الشعاب المرجانية لعقود طويلة.',
+          fact3Title: 'حماية الشعاب المرجانية',
+          fact3Body: 'تأوي الشعاب المرجانية ربع الكائنات البحرية؛ تقليل النفايات وتجنب لمس الشعاب أثناء الغوص يساعدها على التعافي والازدهار.',
+          playAgainBtn: 'العب مرة أخرى',
+          winBadge: 'اكتملت المهمة بنجاح! 🏆',
+          winTitle: 'أحسنت يا بطل الأعماق!',
+          winReason: 'وصلت إلى عمق 100 متر بنجاح وساهمت في تنظيف وحماية النظام البيئي البحري.',
+          loseBadge: 'انتهت المحاولة',
+          loseTitleOxygen: 'نفد مخزون الأكسجين!',
+          loseReasonOxygen: 'تأكد من التقاط فقاعات O₂ الكبيرة باستمرار أثناء النزول للأعماق.',
+          loseTitleLives: 'تعرّض الغواص لإصابات!',
+          loseReasonLives: 'انتبه لعلامات التحذير ⚠️ وفتحات العبور في شباك الصيد المهجورة.',
+          newRecord: 'رقم قياسي جديد! 🎉'
+        },
+        en: {
+          dir: 'ltr',
+          langBtn: 'العربية',
+          gameTitle: 'Reef Descent',
+          missionTag: 'Ocean Conservation Mission • 0m → 100m',
+          gameSubtitle: 'Dive deep beneath the waves, clear marine plastic debris, and manage your oxygen supply all the way down to 100m!',
+          guideMoveTitle: 'Smooth Steering',
+          guideMoveDesc: 'Use Arrow Keys / A & D, or drag with mouse & touch left/right.',
+          guideTrashTitle: 'Clean Debris',
+          guideTrashDesc: 'Collect bottles, bags & cans (+10) to build high score combos.',
+          guideO2Title: 'O₂ Bubbles',
+          guideO2Desc: 'Grab large rising oxygen bubbles to refill your breathing tank.',
+          guideHazardTitle: 'Watch Hazards',
+          guideHazardDesc: 'Dodge jellyfish, ghost nets, and telegraphed shark charges!',
+          startBtn: 'Start Dive',
+          depthLabel: 'DEPTH',
+          scoreLabel: 'SCORE',
+          oxygenLabel: 'OXYGEN O₂',
+          zone1: 'Shallow Reefs (0-35m)',
+          zone2: 'Deep Waters (35-70m)',
+          zone3: 'Twilight Zone (70-100m)',
+          pausedTitle: 'Game Paused',
+          pausedSub: 'Take a deep breath and get ready to continue protecting the reef.',
+          resumeBtn: 'Resume Dive ▶️',
+          restartBtn: 'Restart 🔄',
+          finalScoreLabel: 'Final Score',
+          reachedDepthLabel: 'Reached Depth',
+          bestScoreLabel: 'Best Saved Score',
+          eduHeading: 'Marine Conservation Facts',
+          fact1Title: 'Plastic Pollution',
+          fact1Body: 'Millions of tons of plastic enter our oceans yearly, harming sea turtles and fish that mistake debris for food while persisting for centuries.',
+          fact2Title: 'Ghost Fishing Nets',
+          fact2Body: 'Abandoned fishing nets drift unseen through reefs, entangling marine wildlife and damaging delicate coral habitats for decades.',
+          fact3Title: 'Coral Reef Protection',
+          fact3Body: 'Coral reefs support 25% of all marine species. Reducing ocean waste and diving responsibly helps reefs recover and thrive.',
+          playAgainBtn: 'Play Again',
+          winBadge: 'MISSION COMPLETE! 🏆',
+          winTitle: 'Master of the Reef!',
+          winReason: 'You safely reached 100m depth while cleaning the ocean and protecting marine habitats.',
+          loseBadge: 'RUN ENDED',
+          loseTitleOxygen: 'Out of Oxygen!',
+          loseReasonOxygen: 'Keep an eye on your O₂ gauge and collect large oxygen bubbles as you descend.',
+          loseTitleLives: 'Diver Overwhelmed!',
+          loseReasonLives: 'Watch for edge warning cues ⚠️ and steer through gaps in abandoned nets.',
+          newRecord: 'NEW HIGH SCORE! 🎉'
+        }
+      };
+
+      let currentLang = 'ar';
+
+      /* --------------------------------------------------------------------------
+         2. PROCEDURAL WEB AUDIO SYNTHESIZER (NO EXTERNAL AUDIO FILES)
+         -------------------------------------------------------------------------- */
+      class SoundEngine {
+        constructor() {
+          this.ctx = null;
+          this.muted = false;
+        }
+
+        init() {
+          if (!this.ctx) {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (AudioCtx) {
+              this.ctx = new AudioCtx();
+            }
+          }
+          if (this.ctx && this.ctx.state === 'suspended') {
+            this.ctx.resume().catch(() => {});
+          }
+        }
+
+        toggleMute() {
+          this.muted = !this.muted;
+          return this.muted;
+        }
+
+        playCollect(combo = 1) {
+          if (this.muted || !this.ctx) return;
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          const baseFreq = 440 + Math.min(combo, 10) * 45;
+          osc.frequency.setValueAtTime(baseFreq, now);
+          osc.frequency.exponentialRampToValueAtTime(baseFreq * 1.45, now + 0.14);
+
+          gain.gain.setValueAtTime(0.14, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.17);
+        }
+
+        playOxygen() {
+          if (this.muted || !this.ctx) return;
+          const now = this.ctx.currentTime;
+          [520, 680, 880].forEach((freq, idx) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, now + idx * 0.045);
+            gain.gain.setValueAtTime(0.12, now + idx * 0.045);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.045 + 0.14);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now + idx * 0.045);
+            osc.stop(now + idx * 0.045 + 0.15);
+          });
+        }
+
+        playWarning() {
+          if (this.muted || !this.ctx) return;
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(280, now);
+          osc.frequency.linearRampToValueAtTime(360, now + 0.12);
+          gain.gain.setValueAtTime(0.07, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.16);
+        }
+
+        playHurt() {
+          if (this.muted || !this.ctx) return;
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(190, now);
+          osc.frequency.exponentialRampToValueAtTime(65, now + 0.32);
+          gain.gain.setValueAtTime(0.22, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.34);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.35);
+        }
+
+        playVictory() {
+          if (this.muted || !this.ctx) return;
+          const now = this.ctx.currentTime;
+          const notes = [523.25, 659.25, 783.99, 1046.5];
+          notes.forEach((freq, i) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, now + i * 0.11);
+            gain.gain.setValueAtTime(0.16, now + i * 0.11);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.11 + 0.35);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now + i * 0.11);
+            osc.stop(now + i * 0.11 + 0.36);
+          });
+        }
+      }
+
+      const sound = new SoundEngine();
+
+      /* --------------------------------------------------------------------------
+         3. CANVAS & HIGH-DPI VIEWPORT SETUP
+         -------------------------------------------------------------------------- */
+      const canvas = document.getElementById('gameCanvas');
+      const ctx = canvas.getContext('2d');
+
+      let width = window.innerWidth;
+      let height = window.innerHeight;
+      let dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+
+      function resizeCanvas() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+        canvas.width = Math.floor(width * dpr);
+        canvas.height = Math.floor(height * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        // Keep diver safely inside bounds on resize
+        if (state.diver) {
+          state.diver.y = Math.min(height * 0.34, 240);
+          state.diver.x = Math.max(36, Math.min(width - 36, state.diver.x));
+        }
+      }
+
+      window.addEventListener('resize', resizeCanvas);
+
+      /* --------------------------------------------------------------------------
+         4. PERSISTENCE (LOCALSTORAGE)
+         -------------------------------------------------------------------------- */
+      const STORAGE_KEY_SCORE = 'reef_descent_best_score_v1';
+      const STORAGE_KEY_DEPTH = 'reef_descent_best_depth_v1';
+
+      function getBestScore() {
+        return parseInt(localStorage.getItem(STORAGE_KEY_SCORE) || '0', 10);
+      }
+
+      function getBestDepth() {
+        return parseFloat(localStorage.getItem(STORAGE_KEY_DEPTH) || '0');
+      }
+
+      function saveRecords(score, depth) {
+        const prevBestScore = getBestScore();
+        const prevBestDepth = getBestDepth();
+        let isNewRecord = false;
+        if (score > prevBestScore) {
+          localStorage.setItem(STORAGE_KEY_SCORE, String(Math.floor(score)));
+          isNewRecord = true;
+        }
+        if (depth > prevBestDepth) {
+          localStorage.setItem(STORAGE_KEY_DEPTH, depth.toFixed(1));
+        }
+        return {
+          bestScore: Math.max(score, prevBestScore),
+          isNewRecord
+        };
+      }
+
+      /* --------------------------------------------------------------------------
+         5. GAME STATE & CONFIGURATION
+         -------------------------------------------------------------------------- */
+      const MAX_DEPTH = 100; // meters
+
+      const state = {
+        mode: 'START', // 'START' | 'PLAYING' | 'PAUSED' | 'ENDED'
+        time: 0,
+        depth: 0,
+        score: 0,
+        depthPointsAcc: 0,
+        combo: 1,
+        lives: 3,
+        oxygen: 100,
+        invulnTimer: 0,
+        screenShake: 0,
+        endInfo: null,
+
+        // Diver entity
+        diver: {
+          x: width * 0.5,
+          y: Math.min(height * 0.34, 240),
+          vx: 0,
+          radius: 22,
+          tilt: 0,
+          swimPhase: 0
+        },
+
+        // Input tracking
+        keys: { left: false, right: false },
+        pointerActive: false,
+        pointerTargetX: null,
+
+        // Spawn timers
+        timers: {
+          trash: 0.7,
+          oxygen: 3.4,
+          jellyfish: 2.1,
+          net: 5.5,
+          predator: 6.5
+        },
+
+        // Entity pools
+        trashItems: [],
+        oxygenBubbles: [],
+        jellyfish: [],
+        nets: [],
+        predators: [],
+        floatingTexts: [],
+        burstParticles: [],
+
+        // Multi-layer background elements
+        bgRays: [],
+        bgParticles: [],
+        bgBubbles: [],
+        bgCorals: [],
+        bgKelp: [],
+        bgDistantFish: []
+      };
+
+      /* --------------------------------------------------------------------------
+         6. MULTI-LAYER PARALLAX BACKGROUND INITIALIZATION
+         -------------------------------------------------------------------------- */
+      function initBackgroundLayers() {
+        state.bgRays = [];
+        for (let i = 0; i < 7; i++) {
+          state.bgRays.push({
+            xRatio: (i + 0.5) / 7 + (Math.random() - 0.5) * 0.08,
+            width: 55 + Math.random() * 85,
+            swaySpeed: 0.4 + Math.random() * 0.5,
+            swayPhase: Math.random() * Math.PI * 2,
+            alpha: 0.07 + Math.random() * 0.08
+          });
+        }
+
+        state.bgParticles = [];
+        for (let i = 0; i < 65; i++) {
+          state.bgParticles.push({
+            x: Math.random() * width,
+            y: Math.random() * height,
+            size: 1 + Math.random() * 2.4,
+            speedFactor: 0.15 + Math.random() * 0.45,
+            driftPhase: Math.random() * Math.PI * 2,
+            isBio: Math.random() > 0.45
+          });
+        }
+
+        state.bgBubbles = [];
+        for (let i = 0; i < 28; i++) {
+          state.bgBubbles.push({
+            x: Math.random() * width,
+            y: Math.random() * height,
+            r: 2 + Math.random() * 5,
+            riseSpeed: 28 + Math.random() * 48,
+            wobblePhase: Math.random() * Math.PI * 2
+          });
+        }
+
+        state.bgCorals = [];
+        for (let i = 0; i < 14; i++) {
+          state.bgCorals.push({
+            side: i % 2 === 0 ? 'left' : 'right',
+            y: Math.random() * height * 1.4,
+            scale: 0.65 + Math.random() * 0.75,
+            type: i % 3,
+            hueOffset: (Math.random() - 0.5) * 25
+          });
+        }
+
+        state.bgKelp = [];
+        for (let i = 0; i < 16; i++) {
+          state.bgKelp.push({
+            x: (i / 16) * width + (Math.random() - 0.5) * 40,
+            y: Math.random() * height * 1.3,
+            segments: 5 + Math.floor(Math.random() * 4),
+            segHeight: 18 + Math.random() * 10,
+            phase: Math.random() * Math.PI * 2,
+            speedFactor: 0.35 + Math.random() * 0.2
+          });
+        }
+
+        state.bgDistantFish = [];
+        for (let i = 0; i < 9; i++) {
+          const dir = Math.random() > 0.5 ? 1 : -1;
+          state.bgDistantFish.push({
+            x: Math.random() * width,
+            y: Math.random() * height,
+            dir,
+            speed: (18 + Math.random() * 26) * dir,
+            size: 10 + Math.random() * 14,
+            parallax: 0.22 + Math.random() * 0.18
+          });
+        }
+      }
+
+      /* --------------------------------------------------------------------------
+         7. COLOR INTERPOLATION ACROSS THE THREE OCEAN ZONES
+         -------------------------------------------------------------------------- */
+      function lerp(a, b, t) {
+        return a + (b - a) * Math.max(0, Math.min(1, t));
+      }
+
+      function lerpColor(c1, c2, t) {
+        return [
+          Math.round(lerp(c1[0], c2[0], t)),
+          Math.round(lerp(c1[1], c2[1], t)),
+          Math.round(lerp(c1[2], c2[2], t))
+        ];
+      }
+
+      function rgbStr(rgb, alpha = 1) {
+        return `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${alpha})`;
+      }
+
+      function getOceanPalette(depth) {
+        // Zone 1 (0-35m): Bright Turquoise / Sunlit Shallow Reefs
+        const z1Top = [14, 165, 210];
+        const z1Bot = [6, 95, 145];
+
+        // Zone 2 (35-70m): Deeper Ocean Blue
+        const z2Top = [9, 82, 148];
+        const z2Bot = [5, 42, 92];
+
+        // Zone 3 (70-100m): Dark Indigo / Midnight Pelagic Twilight
+        const z3Top = [11, 24, 68];
+        const z3Bot = [3, 9, 28];
+
+        if (depth <= 35) {
+          const t = depth / 35;
+          return {
+            top: lerpColor(z1Top, z2Top, t * 0.45),
+            bot: lerpColor(z1Bot, z2Bot, t * 0.45),
+            rayAlpha: lerp(1.0, 0.55, t),
+            bioAlpha: lerp(0.05, 0.3, t),
+            zoneIndex: 1
+          };
+        } else if (depth <= 70) {
+          const t = (depth - 35) / 35;
+          const midTop = lerpColor(z1Top, z2Top, 0.45);
+          const midBot = lerpColor(z1Bot, z2Bot, 0.45);
+          return {
+            top: lerpColor(midTop, z3Top, t * 0.65),
+            bot: lerpColor(midBot, z3Bot, t * 0.65),
+            rayAlpha: lerp(0.55, 0.14, t),
+            bioAlpha: lerp(0.3, 0.72, t),
+            zoneIndex: 2
+          };
+        } else {
+          const t = (depth - 70) / 30;
+          const lateTop = lerpColor(lerpColor(z1Top, z2Top, 0.45), z3Top, 0.65);
+          const lateBot = lerpColor(lerpColor(z1Bot, z2Bot, 0.45), z3Bot, 0.65);
+          return {
+            top: lerpColor(lateTop, z3Top, t),
+            bot: lerpColor(lateBot, z3Bot, t),
+            rayAlpha: lerp(0.14, 0.02, t),
+            bioAlpha: lerp(0.72, 1.0, t),
+            zoneIndex: 3
+          };
+        }
+      }
+
+      /* --------------------------------------------------------------------------
+         8. INPUT HANDLING (KEYBOARD + MOUSE/TOUCH POINTER DRAG)
+         -------------------------------------------------------------------------- */
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+          state.keys.left = true;
+          state.pointerActive = false;
+        }
+        if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+          state.keys.right = true;
+          state.pointerActive = false;
+        }
+        if ((e.key === 'p' || e.key === 'P' || e.key === 'Escape') && (state.mode === 'PLAYING' || state.mode === 'PAUSED')) {
+          togglePause();
+        }
+      });
+
+      window.addEventListener('keyup', (e) => {
+        if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+          state.keys.left = false;
+        }
+        if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+          state.keys.right = false;
+        }
+      });
+
+      canvas.addEventListener('pointerdown', (e) => {
+        if (state.mode !== 'PLAYING') return;
+        state.pointerActive = true;
+        state.pointerTargetX = e.clientX;
+      });
+
+      window.addEventListener('pointermove', (e) => {
+        if (state.pointerActive && state.mode === 'PLAYING') {
+          state.pointerTargetX = e.clientX;
+        }
+      });
+
+      window.addEventListener('pointerup', () => {
+        state.pointerActive = false;
+      });
+
+      window.addEventListener('pointercancel', () => {
+        state.pointerActive = false;
+      });
+
+      /* --------------------------------------------------------------------------
+         9. GAME FLOW & UI UPDATES
+         -------------------------------------------------------------------------- */
+      const dom = {
+        hudDepth: document.getElementById('hud-depth'),
+        hudScore: document.getElementById('hud-score'),
+        comboBadge: document.getElementById('combo-badge'),
+        hudZoneText: document.getElementById('hud-zone-text'),
+        hudHearts: document.getElementById('hud-hearts'),
+        hudOxygenPct: document.getElementById('hud-oxygen-pct'),
+        oxygenFill: document.getElementById('oxygen-fill'),
+        startOverlay: document.getElementById('start-overlay'),
+        pauseOverlay: document.getElementById('pause-overlay'),
+        endOverlay: document.getElementById('end-overlay'),
+        endBadge: document.getElementById('end-badge'),
+        endTitle: document.getElementById('end-title'),
+        endReason: document.getElementById('end-reason'),
+        endScore: document.getElementById('end-score'),
+        endDepth: document.getElementById('end-depth'),
+        endBest: document.getElementById('end-best')
+      };
+
+      function applyLanguage(lang) {
+        currentLang = lang;
+        const dict = I18N[lang];
+        document.documentElement.lang = lang;
+        document.documentElement.dir = dict.dir;
+
+        document.querySelectorAll('[data-i18n]').forEach((el) => {
+          const key = el.getAttribute('data-i18n');
+          if (dict[key]) {
+            el.textContent = dict[key];
+          }
+        });
+
+        document.getElementById('btn-lang-hud').textContent = dict.langBtn;
+        document.getElementById('btn-lang-start').textContent = dict.langBtn;
+        document.getElementById('btn-lang-end').textContent = dict.langBtn;
+
+        updateHUD();
+        if (state.mode === 'ENDED' && state.endInfo) {
+          renderEndTexts();
+        }
+      }
+
+      function toggleLanguage() {
+        applyLanguage(currentLang === 'ar' ? 'en' : 'ar');
+      }
+
+      function startGame() {
+        sound.init();
+        state.mode = 'PLAYING';
+        state.depth = 0;
+        state.score = 0;
+        state.depthPointsAcc = 0;
+        state.combo = 1;
+        state.lives = 3;
+        state.oxygen = 100;
+        state.invulnTimer = 0;
+        state.screenShake = 0;
+        state.endInfo = null;
+
+        state.diver.x = width * 0.5;
+        state.diver.y = Math.min(height * 0.34, 240);
+        state.diver.vx = 0;
+        state.diver.tilt = 0;
+
+        state.trashItems = [];
+        state.oxygenBubbles = [];
+        state.jellyfish = [];
+        state.nets = [];
+        state.predators = [];
+        state.floatingTexts = [];
+        state.burstParticles = [];
+
+        state.timers = {
+          trash: 0.4,
+          oxygen: 2.8,
+          jellyfish: 1.6,
+          net: 4.5,
+          predator: 5.5
+        };
+
+        // Spawn an immediate starter trash item and O2 bubble so the screen feels rich right away
+        spawnTrash(width * 0.35, height * 0.72);
+        spawnTrash(width * 0.65, height * 0.88);
+        spawnOxygenBubble(width * 0.5, height * 0.95);
+
+        dom.startOverlay.classList.add('hidden');
+        dom.pauseOverlay.classList.add('hidden');
+        dom.endOverlay.classList.add('hidden');
+        updateHUD();
+      }
+
+      function togglePause() {
+        if (state.mode === 'PLAYING') {
+          state.mode = 'PAUSED';
+          dom.pauseOverlay.classList.remove('hidden');
+        } else if (state.mode === 'PAUSED') {
+          state.mode = 'PLAYING';
+          dom.pauseOverlay.classList.add('hidden');
+          lastTimestamp = performance.now();
+        }
+      }
+
+      function endGame(outcomeType) {
+        // outcomeType: 'WIN' | 'OXYGEN' | 'LIVES'
+        state.mode = 'ENDED';
+        const finalScore = Math.floor(state.score);
+        const reachedDepth = Math.min(MAX_DEPTH, state.depth);
+        const { bestScore, isNewRecord } = saveRecords(finalScore, reachedDepth);
+
+        state.endInfo = {
+          outcomeType,
+          finalScore,
+          reachedDepth,
+          bestScore,
+          isNewRecord
+        };
+
+        if (outcomeType === 'WIN') {
+          sound.playVictory();
+        }
+
+        renderEndTexts();
+        dom.endOverlay.classList.remove('hidden');
+      }
+
+      function renderEndTexts() {
+        const dict = I18N[currentLang];
+        const info = state.endInfo;
+        if (!info) return;
+
+        dom.endScore.textContent = info.finalScore;
+        dom.endDepth.textContent = `${info.reachedDepth.toFixed(1)}m`;
+        dom.endBest.textContent = info.bestScore;
+
+        if (info.outcomeType === 'WIN') {
+          dom.endBadge.className = 'end-status-banner win';
+          dom.endBadge.textContent = info.isNewRecord ? `${dict.winBadge} • ${dict.newRecord}` : dict.winBadge;
+          dom.endTitle.textContent = dict.winTitle;
+          dom.endReason.textContent = dict.winReason;
+        } else if (info.outcomeType === 'OXYGEN') {
+          dom.endBadge.className = 'end-status-banner lose';
+          dom.endBadge.textContent = info.isNewRecord ? `${dict.loseBadge} • ${dict.newRecord}` : dict.loseBadge;
+          dom.endTitle.textContent = dict.loseTitleOxygen;
+          dom.endReason.textContent = dict.loseReasonOxygen;
+        } else {
+          dom.endBadge.className = 'end-status-banner lose';
+          dom.endBadge.textContent = info.isNewRecord ? `${dict.loseBadge} • ${dict.newRecord}` : dict.loseBadge;
+          dom.endTitle.textContent = dict.loseTitleLives;
+          dom.endReason.textContent = dict.loseReasonLives;
+        }
+      }
+
+      function updateHUD() {
+        const dict = I18N[currentLang];
+        dom.hudDepth.textContent = `${state.depth.toFixed(1)}m`;
+        dom.hudScore.textContent = Math.floor(state.score);
+
+        // Combo indicator
+        if (state.combo > 1) {
+          dom.comboBadge.textContent = `x${state.combo}`;
+          dom.comboBadge.classList.add('active');
+        } else {
+          dom.comboBadge.classList.remove('active');
+        }
+
+        // Zone label
+        const zoneIconEl = document.querySelector('#hud-zone span:first-child');
+        if (state.depth < 35) {
+          zoneIconEl.textContent = '☀️';
+          dom.hudZoneText.textContent = dict.zone1;
+        } else if (state.depth < 70) {
+          zoneIconEl.textContent = '🌊';
+          dom.hudZoneText.textContent = dict.zone2;
+        } else {
+          zoneIconEl.textContent = '🌌';
+          dom.hudZoneText.textContent = dict.zone3;
+        }
+
+        // Hearts
+        const hearts = dom.hudHearts.querySelectorAll('.heart');
+        hearts.forEach((h, idx) => {
+          if (idx < state.lives) {
+            h.classList.remove('lost');
+          } else {
+            h.classList.add('lost');
+          }
+        });
+
+        // Oxygen bar
+        const o2Pct = Math.max(0, Math.min(100, Math.round(state.oxygen)));
+        dom.hudOxygenPct.textContent = `${o2Pct}%`;
+        dom.oxygenFill.style.width = `${o2Pct}%`;
+        if (o2Pct <= 25) {
+          dom.oxygenFill.classList.add('low');
+        } else {
+          dom.oxygenFill.classList.remove('low');
+        }
+      }
+
+      /* --------------------------------------------------------------------------
+         10. ENTITY SPAWNERS & HELPERS
+         -------------------------------------------------------------------------- */
+      function addFloatingText(x, y, text, color = '#fbbf24') {
+        state.floatingTexts.push({
+          x,
+          y,
+          text,
+          color,
+          alpha: 1,
+          vy: -48
+        });
+      }
+
+      function addBurst(x, y, color, count = 12) {
+        for (let i = 0; i < count; i++) {
+          const angle = (Math.PI * 2 * i) / count + Math.random() * 0.4;
+          const speed = 45 + Math.random() * 110;
+          state.burstParticles.push({
+            x,
+            y,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            r: 2.5 + Math.random() * 3.5,
+            color,
+            alpha: 1
+          });
+        }
+      }
+
+      function spawnTrash(customX, customY) {
+        const types = ['bottle', 'bag', 'can'];
+        const margin = 48;
+        state.trashItems.push({
+          x: customX !== undefined ? customX : margin + Math.random() * (width - margin * 2),
+          y: customY !== undefined ? customY : height + 35,
+          r: 18,
+          type: types[Math.floor(Math.random() * types.length)],
+          rot: Math.random() * Math.PI * 2,
+          rotSpeed: (Math.random() - 0.5) * 1.8,
+          swayPhase: Math.random() * Math.PI * 2
+        });
+      }
+
+      function spawnOxygenBubble(customX, customY) {
+        const margin = 52;
+        state.oxygenBubbles.push({
+          x: customX !== undefined ? customX : margin + Math.random() * (width - margin * 2),
+          y: customY !== undefined ? customY : height + 40,
+          r: 22,
+          wobblePhase: Math.random() * Math.PI * 2
+        });
+      }
+
+      function spawnJellyfish(difficulty) {
+        const margin = 55;
+        const x = margin + Math.random() * (width - margin * 2);
+        const dir = Math.random() > 0.5 ? 1 : -1;
+        state.jellyfish.push({
+          x,
+          y: height + 45,
+          r: 22,
+          vx: dir * (65 + difficulty * 65 + Math.random() * 35),
+          pulsePhase: Math.random() * Math.PI * 2
+        });
+      }
+
+      function spawnFishingNet() {
+        // Ensure a generous, always-passable gap
+        const diverDiameter = state.diver.radius * 2;
+        const gapWidth = Math.max(diverDiameter * 2.9, Math.min(width * 0.34, 165));
+        const margin = 35;
+        const minGapCenter = margin + gapWidth * 0.5;
+        const maxGapCenter = width - margin - gapWidth * 0.5;
+        const gapCenter = minGapCenter + Math.random() * Math.max(10, maxGapCenter - minGapCenter);
+
+        state.nets.push({
+          y: height + 40,
+          thickness: 22,
+          gapStart: gapCenter - gapWidth * 0.5,
+          gapEnd: gapCenter + gapWidth * 0.5
+        });
+      }
+
+      function spawnPredator(difficulty) {
+        const fromLeft = Math.random() > 0.5;
+        const isShark = Math.random() > 0.45;
+        // Align predator near diver's vertical band (or slightly below) so player can dodge horizontally or anticipate
+        const targetY = Math.max(110, Math.min(height - 90, state.diver.y + (Math.random() - 0.35) * 90));
+        const telegraphDuration = 1.25; // Fair 1.25s telegraph cue before dash
+
+        sound.playWarning();
+
+        state.predators.push({
+          fromLeft,
+          isShark,
+          x: fromLeft ? -70 : width + 70,
+          y: targetY,
+          w: isShark ? 96 : 78,
+          h: isShark ? 30 : 20,
+          speed: (isShark ? 490 : 580) + difficulty * 190,
+          state: 'TELEGRAPH', // 'TELEGRAPH' -> 'CHARGING'
+          timer: telegraphDuration
+        });
+      }
+
+      function handleDiverHit() {
+        if (state.invulnTimer > 0) return;
+
+        state.lives -= 1;
+        state.combo = 1;
+        state.invulnTimer = 1.65;
+        state.screenShake = 0.32;
+        sound.playHurt();
+        addBurst(state.diver.x, state.diver.y, '#f43f5e', 16);
+
+        if (state.lives <= 0) {
+          state.lives = 0;
+          updateHUD();
+          endGame('LIVES');
+        } else {
+          updateHUD();
+        }
+      }
+
+      /* --------------------------------------------------------------------------
+         11. MAIN SIMULATION UPDATE (DELTA-TIME)
+         -------------------------------------------------------------------------- */
+      function update(dt) {
+        state.time += dt;
+
+        // Scroll speed scales smoothly with depth (0m -> 100m)
+        const difficulty = Math.min(1, state.depth / MAX_DEPTH);
+        const scrollSpeed = state.mode === 'PLAYING'
+          ? (135 + difficulty * 115)
+          : 65; // Gentle ambient scroll on start/end screens
+
+        // Update animated parallax background layers regardless of mode
+        updateBackground(dt, scrollSpeed);
+
+        if (state.mode !== 'PLAYING') return;
+
+        // 1. Depth progression (0m to 100m over ~65-75 seconds)
+        const metersPerSecond = 1.22 + difficulty * 0.42;
+        state.depth = Math.min(MAX_DEPTH, state.depth + metersPerSecond * dt);
+
+        // Award gradual depth points
+        state.depthPointsAcc += metersPerSecond * dt * 4;
+        if (state.depthPointsAcc >= 1) {
+          const pts = Math.floor(state.depthPointsAcc);
+          state.score += pts;
+          state.depthPointsAcc -= pts;
+        }
+
+        // Check victory at 100m
+        if (state.depth >= MAX_DEPTH) {
+          state.depth = MAX_DEPTH;
+          state.score += 100; // Depth completion bonus
+          updateHUD();
+          endGame('WIN');
+          return;
+        }
+
+        // 2. Oxygen depletion
+        const oxygenDrainRate = 3.6 + difficulty * 1.4; // % per second
+        state.oxygen -= oxygenDrainRate * dt;
+        if (state.oxygen <= 0) {
+          state.oxygen = 0;
+          updateHUD();
+          endGame('OXYGEN');
+          return;
+        }
+
+        // 3. Invulnerability & screen shake timers
+        if (state.invulnTimer > 0) state.invulnTimer = Math.max(0, state.invulnTimer - dt);
+        if (state.screenShake > 0) state.screenShake = Math.max(0, state.screenShake - dt);
+
+        // 4. Diver horizontal steering
+        const diver = state.diver;
+        diver.swimPhase += dt * 9;
+        const maxMoveSpeed = 380;
+
+        if (state.pointerActive && state.pointerTargetX !== null) {
+          const diffX = state.pointerTargetX - diver.x;
+          diver.vx = Math.max(-maxMoveSpeed * 1.25, Math.min(maxMoveSpeed * 1.25, diffX * 10));
+        } else {
+          let moveDir = 0;
+          if (state.keys.left) moveDir -= 1;
+          if (state.keys.right) moveDir += 1;
+          const targetVx = moveDir * maxMoveSpeed;
+          diver.vx += (targetVx - diver.vx) * Math.min(1, dt * 14);
+        }
+
+        diver.x += diver.vx * dt;
+        const wallPad = diver.radius + 14;
+        if (diver.x < wallPad) {
+          diver.x = wallPad;
+          diver.vx = 0;
+        } else if (diver.x > width - wallPad) {
+          diver.x = width - wallPad;
+          diver.vx = 0;
+        }
+        diver.tilt = (diver.vx / maxMoveSpeed) * 0.35;
+
+        // 5. Entity Spawning
+        state.timers.trash -= dt;
+        if (state.timers.trash <= 0) {
+          spawnTrash();
+          state.timers.trash = Math.max(0.65, 1.35 - difficulty * 0.45) + Math.random() * 0.4;
+        }
+
+        state.timers.oxygen -= dt;
+        if (state.timers.oxygen <= 0) {
+          spawnOxygenBubble();
+          state.timers.oxygen = 4.2 + Math.random() * 1.8;
+        }
+
+        state.timers.jellyfish -= dt;
+        if (state.timers.jellyfish <= 0) {
+          spawnJellyfish(difficulty);
+          state.timers.jellyfish = Math.max(1.3, 2.7 - difficulty * 1.1) + Math.random() * 0.7;
+        }
+
+        state.timers.net -= dt;
+        if (state.timers.net <= 0 && state.depth > 8) {
+          spawnFishingNet();
+          state.timers.net = Math.max(4.4, 7.2 - difficulty * 2.2) + Math.random() * 1.2;
+        }
+
+        state.timers.predator -= dt;
+        if (state.timers.predator <= 0 && state.depth > 14) {
+          spawnPredator(difficulty);
+          state.timers.predator = Math.max(3.6, 6.8 - difficulty * 2.5) + Math.random() * 1.4;
+        }
+
+        // 6. Update Trash Collectibles
+        for (let i = state.trashItems.length - 1; i >= 0; i--) {
+          const item = state.trashItems[i];
+          item.y -= scrollSpeed * dt;
+          item.rot += item.rotSpeed * dt;
+          item.x += Math.sin(state.time * 2.5 + item.swayPhase) * 18 * dt;
+
+          const dist = Math.hypot(item.x - diver.x, item.y - diver.y);
+          if (dist < diver.radius + item.r + 4) {
+            const earned = 10 * state.combo;
+            state.score += earned;
+            state.combo = Math.min(10, state.combo + 1);
+            sound.playCollect(state.combo);
+            addBurst(item.x, item.y, '#38bdf8', 10);
+            addFloatingText(item.x, item.y - 10, `+${earned}`, '#fbbf24');
+            state.trashItems.splice(i, 1);
+            continue;
+          }
+
+          if (item.y < -50) {
+            state.trashItems.splice(i, 1);
+          }
+        }
+
+        // 7. Update O2 Bubbles
+        for (let i = state.oxygenBubbles.length - 1; i >= 0; i--) {
+          const b = state.oxygenBubbles[i];
+          b.y -= (scrollSpeed * 0.85 + 32) * dt;
+          b.x += Math.sin(state.time * 3 + b.wobblePhase) * 24 * dt;
+
+          const dist = Math.hypot(b.x - diver.x, b.y - diver.y);
+          if (dist < diver.radius + b.r + 4) {
+            state.oxygen = Math.min(100, state.oxygen + 28);
+            state.score += 5;
+            sound.playOxygen();
+            addBurst(b.x, b.y, '#67e8f9', 14);
+            addFloatingText(b.x, b.y - 12, '+O₂', '#67e8f9');
+            state.oxygenBubbles.splice(i, 1);
+            continue;
+          }
+
+          if (b.y < -55) {
+            state.oxygenBubbles.splice(i, 1);
+          }
+        }
+
+        // 8. Update Jellyfish Hazards
+        for (let i = state.jellyfish.length - 1; i >= 0; i--) {
+          const j = state.jellyfish[i];
+          j.y -= (scrollSpeed * 0.92 + Math.sin(state.time * 3.5 + j.pulsePhase) * 28) * dt;
+          j.x += j.vx * dt;
+          if (j.x < 36 || j.x > width - 36) {
+            j.vx *= -1;
+            j.x = Math.max(36, Math.min(width - 36, j.x));
+          }
+
+          const dist = Math.hypot(j.x - diver.x, j.y - diver.y);
+          if (dist < diver.radius + j.r - 4) {
+            handleDiverHit();
+          }
+
+          if (j.y < -60) {
+            state.jellyfish.splice(i, 1);
+          }
+        }
+
+        // 9. Update Abandoned Fishing Nets
+        for (let i = state.nets.length - 1; i >= 0; i--) {
+          const net = state.nets[i];
+          net.y -= scrollSpeed * dt;
+
+          // Check vertical overlap with diver
+          const vertHit = Math.abs(net.y - diver.y) < (net.thickness * 0.5 + diver.radius - 4);
+          if (vertHit) {
+            const insideSafeGap = (diver.x - diver.radius * 0.65 >= net.gapStart) &&
+                                  (diver.x + diver.radius * 0.65 <= net.gapEnd);
+            if (!insideSafeGap) {
+              handleDiverHit();
+            }
+          }
+
+          if (net.y < -50) {
+            state.nets.splice(i, 1);
+          }
+        }
+
+        // 10. Update Telegraphed Predators (Barracuda & Shark)
+        for (let i = state.predators.length - 1; i >= 0; i--) {
+          const p = state.predators[i];
+          if (p.state === 'TELEGRAPH') {
+            p.timer -= dt;
+            // Subtle vertical tracking during early telegraph, locking in for last 0.45s so dodge is reliable
+            if (p.timer > 0.45) {
+              p.y += (diver.y - p.y) * Math.min(1, dt * 2.2);
+            }
+            if (p.timer <= 0) {
+              p.state = 'CHARGING';
+            }
+          } else {
+            p.x += (p.fromLeft ? 1 : -1) * p.speed * dt;
+            p.y -= scrollSpeed * 0.18 * dt;
+
+            // Capsule/box collision check
+            const dx = Math.abs(p.x - diver.x);
+            const dy = Math.abs(p.y - diver.y);
+            if (dx < (p.w * 0.42 + diver.radius - 4) && dy < (p.h * 0.48 + diver.radius - 4)) {
+              handleDiverHit();
+            }
+
+            if ((p.fromLeft && p.x > width + 130) || (!p.fromLeft && p.x < -130)) {
+              state.predators.splice(i, 1);
+            }
+          }
+        }
+
+        // 11. Update Floating Texts & Particles
+        for (let i = state.floatingTexts.length - 1; i >= 0; i--) {
+          const ft = state.floatingTexts[i];
+          ft.y += ft.vy * dt;
+          ft.alpha -= dt * 1.15;
+          if (ft.alpha <= 0) state.floatingTexts.splice(i, 1);
+        }
+
+        for (let i = state.burstParticles.length - 1; i >= 0; i--) {
+          const bp = state.burstParticles[i];
+          bp.x += bp.vx * dt;
+          bp.y += bp.vy * dt;
+          bp.alpha -= dt * 1.8;
+          if (bp.alpha <= 0) state.burstParticles.splice(i, 1);
+        }
+
+        updateHUD();
+      }
+
+      function updateBackground(dt, scrollSpeed) {
+        // Suspended plankton & bioluminescent specks
+        for (const pt of state.bgParticles) {
+          pt.y -= scrollSpeed * pt.speedFactor * dt;
+          pt.x += Math.sin(state.time * 1.2 + pt.driftPhase) * 12 * dt;
+          if (pt.y < -10) {
+            pt.y = height + 10;
+            pt.x = Math.random() * width;
+          }
+        }
+
+        // Rising ambient bubbles
+        for (const b of state.bgBubbles) {
+          b.y -= (b.riseSpeed + scrollSpeed * 0.25) * dt;
+          b.x += Math.sin(state.time * 2.2 + b.wobblePhase) * 14 * dt;
+          if (b.y < -15) {
+            b.y = height + 15;
+            b.x = Math.random() * width;
+          }
+        }
+
+        // Parallax Coral Silhouettes
+        for (const c of state.bgCorals) {
+          c.y -= scrollSpeed * 0.32 * dt;
+          if (c.y < -140) {
+            c.y = height + 140;
+            c.scale = 0.65 + Math.random() * 0.75;
+          }
+        }
+
+        // Parallax Kelp
+        for (const k of state.bgKelp) {
+          k.y -= scrollSpeed * k.speedFactor * dt;
+          if (k.y < -160) {
+            k.y = height + 160;
+            k.x = Math.random() * width;
+          }
+        }
+
+        // Distant Fish Silhouettes
+        for (const f of state.bgDistantFish) {
+          f.x += f.speed * dt;
+          f.y -= scrollSpeed * f.parallax * dt;
+          if (f.y < -40) {
+            f.y = height + 40;
+          }
+          if (f.dir > 0 && f.x > width + 60) f.x = -60;
+          if (f.dir < 0 && f.x < -60) f.x = width + 60;
+        }
+      }
+
+      /* --------------------------------------------------------------------------
+         12. RENDERING PIPELINE (MULTI-LAYER OCEAN + ENTITIES + TELEGRAPHING)
+         -------------------------------------------------------------------------- */
+      function render() {
+        ctx.save();
+
+        // Screen shake on impact
+        if (state.screenShake > 0) {
+          const mag = state.screenShake * 18;
+          ctx.translate((Math.random() - 0.5) * mag, (Math.random() - 0.5) * mag);
+        }
+
+        const palette = getOceanPalette(state.depth);
+
+        // Layer 1: Smooth Ocean Gradient Backdrop
+        const bgGrad = ctx.createLinearGradient(0, 0, 0, height);
+        bgGrad.addColorStop(0, rgbStr(palette.top));
+        bgGrad.addColorStop(1, rgbStr(palette.bot));
+        ctx.fillStyle = bgGrad;
+        ctx.fillRect(0, 0, width, height);
+
+        // Layer 2: Swaying Sunbeams / Light Rays (Fading with depth)
+        if (palette.rayAlpha > 0.01) {
+          for (const ray of state.bgRays) {
+            const topX = ray.xRatio * width + Math.sin(state.time * ray.swaySpeed + ray.swayPhase) * 35;
+            const spread = ray.width * 2.3;
+            const rayGrad = ctx.createLinearGradient(topX, 0, topX, height * 0.85);
+            const alpha = ray.alpha * palette.rayAlpha * (0.85 + 0.15 * Math.sin(state.time * 1.4 + ray.swayPhase));
+            rayGrad.addColorStop(0, `rgba(186, 242, 255, ${alpha})`);
+            rayGrad.addColorStop(1, 'rgba(186, 242, 255, 0)');
+
+            ctx.fillStyle = rayGrad;
+            ctx.beginPath();
+            ctx.moveTo(topX - ray.width * 0.5, 0);
+            ctx.lineTo(topX + ray.width * 0.5, 0);
+            ctx.lineTo(topX + spread, height * 0.85);
+            ctx.lineTo(topX - spread, height * 0.85);
+            ctx.closePath();
+            ctx.fill();
+          }
+        }
+
+        // Layer 3: Distant Sea Fish Silhouettes
+        ctx.fillStyle = `rgba(4, 18, 36, ${0.24 + palette.bioAlpha * 0.15})`;
+        for (const f of state.bgDistantFish) {
+          ctx.save();
+          ctx.translate(f.x, f.y);
+          ctx.scale(f.dir, 1);
+          ctx.beginPath();
+          ctx.ellipse(0, 0, f.size, f.size * 0.42, 0, 0, Math.PI * 2);
+          ctx.moveTo(-f.size * 0.8, 0);
+          ctx.lineTo(-f.size * 1.45, -f.size * 0.45);
+          ctx.lineTo(-f.size * 1.45, f.size * 0.45);
+          ctx.closePath();
+          ctx.fill();
+          ctx.restore();
+        }
+
+        // Layer 4: Swaying Kelp & Coral Reef Silhouettes
+        renderKelpAndCoral(palette);
+
+        // Layer 5: Floating Plankton, Bioluminescent Specks & Rising Bubbles
+        for (const pt of state.bgParticles) {
+          if (pt.isBio && palette.bioAlpha > 0.15) {
+            ctx.fillStyle = `rgba(94, 234, 212, ${0.35 * palette.bioAlpha})`;
+          } else {
+            ctx.fillStyle = 'rgba(224, 242, 254, 0.22)';
+          }
+          ctx.beginPath();
+          ctx.arc(pt.x, pt.y, pt.size, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        for (const b of state.bgBubbles) {
+          ctx.strokeStyle = 'rgba(186, 230, 253, 0.28)';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+
+        // Layer 6: Gameplay Entities
+        renderFishingNets();
+        renderTrashItems();
+        renderOxygenBubbles();
+        renderJellyfish();
+        renderPredators();
+        renderDiver();
+
+        // Layer 7: Burst Particles & Floating Score Popups
+        for (const bp of state.burstParticles) {
+          ctx.save();
+          ctx.globalAlpha = Math.max(0, bp.alpha);
+          ctx.fillStyle = bp.color;
+          ctx.beginPath();
+          ctx.arc(bp.x, bp.y, bp.r, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+
+        for (const ft of state.floatingTexts) {
+          ctx.save();
+          ctx.globalAlpha = Math.max(0, ft.alpha);
+          ctx.font = '800 17px system-ui, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillStyle = ft.color;
+          ctx.shadowColor = 'rgba(0,0,0,0.65)';
+          ctx.shadowBlur = 6;
+          ctx.fillText(ft.text, ft.x, ft.y);
+          ctx.restore();
+        }
+
+        ctx.restore();
+      }
+
+      function renderKelpAndCoral(palette) {
+        // Swaying kelp strands
+        ctx.strokeStyle = palette.zoneIndex === 1
+          ? 'rgba(13, 148, 136, 0.24)'
+          : 'rgba(15, 23, 42, 0.35)';
+        ctx.lineWidth = 6;
+        ctx.lineCap = 'round';
+
+        for (const k of state.bgKelp) {
+          ctx.beginPath();
+          let curX = k.x;
+          let curY = k.y;
+          ctx.moveTo(curX, curY);
+          for (let s = 1; s <= k.segments; s++) {
+            const sway = Math.sin(state.time * 2.1 + k.phase + s * 0.7) * 14;
+            curX = k.x + sway;
+            curY = k.y - s * k.segHeight;
+            ctx.lineTo(curX, curY);
+          }
+          ctx.stroke();
+        }
+
+        // Coral formations along left/right reef walls
+        for (const c of state.bgCorals) {
+          ctx.save();
+          const baseX = c.side === 'left' ? -10 : width + 10;
+          ctx.translate(baseX, c.y);
+          ctx.scale(c.side === 'left' ? c.scale : -c.scale, c.scale);
+
+          ctx.fillStyle = palette.zoneIndex === 1
+            ? 'rgba(19, 78, 94, 0.34)'
+            : 'rgba(6, 18, 36, 0.45)';
+
+          ctx.beginPath();
+          ctx.arc(28, 0, 34, 0, Math.PI * 2);
+          ctx.arc(54, -18, 22, 0, Math.PI * 2);
+          ctx.arc(48, 20, 25, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+      }
+
+      function renderTrashItems() {
+        for (const item of state.trashItems) {
+          ctx.save();
+          ctx.translate(item.x, item.y);
+          ctx.rotate(item.rot);
+
+          // Soft collectible glow
+          ctx.shadowColor = 'rgba(56, 189, 248, 0.65)';
+          ctx.shadowBlur = 12;
+
+          if (item.type === 'bottle') {
+            // Plastic Water Bottle
+            ctx.fillStyle = 'rgba(186, 230, 253, 0.85)';
+            ctx.strokeStyle = '#38bdf8';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.roundRect(-8, -14, 16, 26, 5);
+            ctx.fill();
+            ctx.stroke();
+            // Bottle cap
+            ctx.fillStyle = '#0284c7';
+            ctx.fillRect(-4, -19, 8, 5);
+            // Label band
+            ctx.fillStyle = '#f43f5e';
+            ctx.fillRect(-8, -3, 16, 6);
+          } else if (item.type === 'bag') {
+            // Floating Plastic Bag
+            ctx.fillStyle = 'rgba(241, 245, 249, 0.78)';
+            ctx.strokeStyle = '#94a3b8';
+            ctx.lineWidth = 1.8;
+            ctx.beginPath();
+            ctx.moveTo(-11, -12);
+            ctx.lineTo(-6, -4);
+            ctx.lineTo(6, -4);
+            ctx.lineTo(11, -12);
+            ctx.lineTo(14, 10);
+            ctx.quadraticCurveTo(0, 16, -14, 10);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+          } else {
+            // Crushed Aluminum Can
+            ctx.fillStyle = '#e2e8f0';
+            ctx.strokeStyle = '#64748b';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.roundRect(-9, -12, 18, 24, 4);
+            ctx.fill();
+            ctx.stroke();
+            ctx.fillStyle = '#f59e0b';
+            ctx.fillRect(-9, -4, 18, 8);
+          }
+
+          ctx.restore();
+        }
+      }
+
+      function renderOxygenBubbles() {
+        for (const b of state.oxygenBubbles) {
+          ctx.save();
+          ctx.translate(b.x, b.y);
+          const pulse = 1 + Math.sin(state.time * 5 + b.wobblePhase) * 0.06;
+          ctx.scale(pulse, pulse);
+
+          // Outer bubble sphere
+          const grad = ctx.createRadialGradient(-6, -6, 3, 0, 0, b.r);
+          grad.addColorStop(0, 'rgba(255, 255, 255, 0.92)');
+          grad.addColorStop(0.45, 'rgba(56, 189, 248, 0.45)');
+          grad.addColorStop(1, 'rgba(6, 182, 212, 0.85)');
+
+          ctx.fillStyle = grad;
+          ctx.beginPath();
+          ctx.arc(0, 0, b.r, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.strokeStyle = '#a5f3fc';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+
+          // O2 Label inside bubble
+          ctx.fillStyle = '#ffffff';
+          ctx.font = '900 13px system-ui, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText('O₂', 0, 1);
+
+          ctx.restore();
+        }
+      }
+
+      function renderJellyfish() {
+        for (const j of state.jellyfish) {
+          ctx.save();
+          ctx.translate(j.x, j.y);
+          const squeeze = 1 + Math.sin(state.time * 5 + j.pulsePhase) * 0.12;
+          ctx.scale(squeeze, 1 / squeeze);
+
+          // Glowing bioluminescent bell
+          ctx.shadowColor = 'rgba(244, 114, 182, 0.75)';
+          ctx.shadowBlur = 14;
+
+          // Tentacles
+          ctx.strokeStyle = 'rgba(251, 113, 133, 0.85)';
+          ctx.lineWidth = 2.4;
+          for (let t = -2; t <= 2; t++) {
+            ctx.beginPath();
+            ctx.moveTo(t * 6, 4);
+            const wave = Math.sin(state.time * 7 + t) * 5;
+            ctx.quadraticCurveTo(t * 7 + wave, 16, t * 6 - wave, 28);
+            ctx.stroke();
+          }
+
+          // Dome
+          const domeGrad = ctx.createRadialGradient(0, -8, 3, 0, -4, j.r);
+          domeGrad.addColorStop(0, '#fbcfe8');
+          domeGrad.addColorStop(0.6, '#ec4899');
+          domeGrad.addColorStop(1, '#be185d');
+
+          ctx.fillStyle = domeGrad;
+          ctx.beginPath();
+          ctx.arc(0, 2, j.r, Math.PI, 0);
+          ctx.quadraticCurveTo(0, 8, -j.r, 2);
+          ctx.fill();
+
+          ctx.restore();
+        }
+      }
+
+      function renderFishingNets() {
+        for (const net of state.nets) {
+          ctx.save();
+          const h = net.thickness;
+          const topY = net.y - h * 0.5;
+
+          // Draw Left & Right Net Segments leaving the central passable gap
+          drawNetSegment(0, topY, net.gapStart, h);
+          drawNetSegment(net.gapEnd, topY, width - net.gapEnd, h);
+
+          // Draw bright cyan/green guide buoys at gap edges for clear readability
+          ctx.fillStyle = '#2dd4bf';
+          ctx.shadowColor = '#2dd4bf';
+          ctx.shadowBlur = 10;
+          ctx.beginPath();
+          ctx.arc(net.gapStart, net.y, 7, 0, Math.PI * 2);
+          ctx.arc(net.gapEnd, net.y, 7, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.restore();
+        }
+      }
+
+      function drawNetSegment(x, y, segW, segH) {
+        if (segW <= 0) return;
+        ctx.fillStyle = 'rgba(180, 83, 9, 0.35)';
+        ctx.fillRect(x, y, segW, segH);
+
+        // Rope borders
+        ctx.strokeStyle = '#f59e0b';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + segW, y);
+        ctx.moveTo(x, y + segH);
+        ctx.lineTo(x + segW, y + segH);
+        ctx.stroke();
+
+        // Cross-hatch mesh pattern
+        ctx.strokeStyle = 'rgba(253, 230, 138, 0.65)';
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        for (let gx = x; gx < x + segW; gx += 16) {
+          ctx.moveTo(gx, y);
+          ctx.lineTo(Math.min(x + segW, gx + 12), y + segH);
+          ctx.moveTo(Math.min(x + segW, gx + 12), y);
+          ctx.lineTo(gx, y + segH);
+        }
+        ctx.stroke();
+      }
+
+      function renderPredators() {
+        for (const p of state.predators) {
+          if (p.state === 'TELEGRAPH') {
+            // Crucial fair telegraphing: Edge warning badge + horizontal alignment line
+            ctx.save();
+            const blink = Math.sin(state.time * 24) > 0;
+            const edgeX = p.fromLeft ? 34 : width - 34;
+
+            // Dashed trajectory preview line
+            ctx.strokeStyle = blink ? 'rgba(244, 63, 94, 0.55)' : 'rgba(251, 191, 36, 0.3)';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([10, 10]);
+            ctx.beginPath();
+            ctx.moveTo(0, p.y);
+            ctx.lineTo(width, p.y);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Warning Pill at screen edge
+            ctx.fillStyle = blink ? '#e11d48' : '#b91c1c';
+            ctx.shadowColor = '#f43f5e';
+            ctx.shadowBlur = 14;
+            ctx.beginPath();
+            ctx.arc(edgeX, p.y, 20, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.font = '900 18px system-ui, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText('⚠️', edgeX, p.y);
+
+            ctx.restore();
+          } else {
+            // Charging Predator (Shark or Barracuda)
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.scale(p.fromLeft ? 1 : -1, 1);
+
+            if (p.isShark) {
+              // Sleek Great Shark
+              ctx.fillStyle = '#475569';
+              ctx.beginPath();
+              ctx.moveTo(48, 0);
+              ctx.quadraticCurveTo(15, -18, -36, -8);
+              ctx.lineTo(-54, -20);
+              ctx.lineTo(-44, 0);
+              ctx.lineTo(-54, 18);
+              ctx.lineTo(-36, 8);
+              ctx.quadraticCurveTo(15, 16, 48, 0);
+              ctx.fill();
+
+              // Dorsal fin
+              ctx.beginPath();
+              ctx.moveTo(-4, -12);
+              ctx.lineTo(-16, -28);
+              ctx.lineTo(-22, -10);
+              ctx.closePath();
+              ctx.fill();
+
+              // Belly highlight
+              ctx.fillStyle = '#cbd5e1';
+              ctx.beginPath();
+              ctx.ellipse(6, 5, 32, 6, 0, 0, Math.PI);
+              ctx.fill();
+
+              // Fierce eye
+              ctx.fillStyle = '#f43f5e';
+              ctx.beginPath();
+              ctx.arc(30, -3, 3, 0, Math.PI * 2);
+              ctx.fill();
+            } else {
+              // Fast Barracuda
+              ctx.fillStyle = '#0ea5e9';
+              ctx.beginPath();
+              ctx.moveTo(42, 0);
+              ctx.lineTo(-34, -9);
+              ctx.lineTo(-46, -15);
+              ctx.lineTo(-38, 0);
+              ctx.lineTo(-46, 15);
+              ctx.lineTo(-34, 9);
+              ctx.closePath();
+              ctx.fill();
+
+              // Silver stripes
+              ctx.strokeStyle = '#e0f2fe';
+              ctx.lineWidth = 2;
+              for (let sx = -15; sx <= 15; sx += 10) {
+                ctx.beginPath();
+                ctx.moveTo(sx, -6);
+                ctx.lineTo(sx - 4, 6);
+                ctx.stroke();
+              }
+
+              ctx.fillStyle = '#fbbf24';
+              ctx.beginPath();
+              ctx.arc(26, -2, 2.5, 0, Math.PI * 2);
+              ctx.fill();
+            }
+
+            ctx.restore();
+          }
+        }
+      }
+
+      function renderDiver() {
+        const d = state.diver;
+        // Blink during invulnerability frames
+        if (state.invulnTimer > 0 && Math.floor(state.invulnTimer * 16) % 2 === 0) {
+          return;
+        }
+
+        ctx.save();
+        ctx.translate(d.x, d.y);
+        ctx.rotate(d.tilt);
+
+        const kick = Math.sin(d.swimPhase) * 7;
+
+        // Flippers (top, since diver is descending head-downward)
+        ctx.fillStyle = '#0284c7';
+        ctx.beginPath();
+        ctx.ellipse(-8, -26 + kick * 0.4, 5, 11, -0.2, 0, Math.PI * 2);
+        ctx.ellipse(8, -26 - kick * 0.4, 5, 11, 0.2, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Scuba Tank on back
+        ctx.fillStyle = '#f59e0b';
+        ctx.strokeStyle = '#b45309';
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.roundRect(-7, -14, 14, 20, 5);
+        ctx.fill();
+        ctx.stroke();
+
+        // Wetsuit Torso & Arms
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath();
+        ctx.roundRect(-11, -12, 22, 24, 9);
+        ctx.fill();
+
+        // Neon dive suit stripes
+        ctx.fillStyle = '#2dd4bf';
+        ctx.fillRect(-11, -3, 22, 4);
+
+        // Diver Head & Mask (facing downward toward the deep reef)
+        ctx.fillStyle = '#fde68a';
+        ctx.beginPath();
+        ctx.arc(0, 16, 11, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Diving Goggles
+        ctx.fillStyle = '#38bdf8';
+        ctx.strokeStyle = '#0f172a';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(-9, 14, 18, 8, 4);
+        ctx.fill();
+        ctx.stroke();
+
+        // Subtle helmet headlamp cone in deeper waters
+        if (state.depth > 35) {
+          const beamAlpha = Math.min(0.28, ((state.depth - 35) / 65) * 0.28);
+          const beamGrad = ctx.createLinearGradient(0, 22, 0, 175);
+          beamGrad.addColorStop(0, `rgba(224, 242, 254, ${beamAlpha})`);
+          beamGrad.addColorStop(1, 'rgba(224, 242, 254, 0)');
+          ctx.fillStyle = beamGrad;
+          ctx.beginPath();
+          ctx.moveTo(-6, 22);
+          ctx.lineTo(6, 22);
+          ctx.lineTo(58, 175);
+          ctx.lineTo(-58, 175);
+          ctx.closePath();
+          ctx.fill();
+        }
+
+        ctx.restore();
+      }
+
+      /* --------------------------------------------------------------------------
+         13. ANIMATION LOOP & EVENT LISTENERS
+         -------------------------------------------------------------------------- */
+      let lastTimestamp = 0;
+
+      function gameLoop(timestamp) {
+        if (!lastTimestamp) lastTimestamp = timestamp;
+        const rawDt = (timestamp - lastTimestamp) / 1000;
+        lastTimestamp = timestamp;
+        // Clamp delta-time for tab-switch safety
+        const dt = Math.min(0.05, Math.max(0.001, rawDt));
+
+        update(dt);
+        render();
+
+        requestAnimationFrame(gameLoop);
+      }
+
+      // Button Bindings
+      document.getElementById('btn-start').addEventListener('click', startGame);
+      document.getElementById('btn-restart').addEventListener('click', startGame);
+      document.getElementById('btn-restart-pause').addEventListener('click', startGame);
+      document.getElementById('btn-pause').addEventListener('click', () => {
+        if (state.mode === 'PLAYING' || state.mode === 'PAUSED') togglePause();
+      });
+      document.getElementById('btn-resume').addEventListener('click', togglePause);
+
+      document.getElementById('btn-sound').addEventListener('click', (e) => {
+        sound.init();
+        const isMuted = sound.toggleMute();
+        e.currentTarget.textContent = isMuted ? '🔇' : '🔊';
+      });
+
+      document.getElementById('btn-lang-hud').addEventListener('click', toggleLanguage);
+      document.getElementById('btn-lang-start').addEventListener('click', toggleLanguage);
+      document.getElementById('btn-lang-end').addEventListener('click', toggleLanguage);
+
+      // Boot on Window Load
+      window.onload = function () {
+        resizeCanvas();
+        initBackgroundLayers();
+        applyLanguage('ar');
+        requestAnimationFrame(gameLoop);
+      };
+    })();
+  </script>
+</body>
+</html>

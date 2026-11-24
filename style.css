@@ -1,0 +1,2500 @@
+/* ========================================
+   RED SEA WEBSITE - PREMIUM OCEAN THEME
+======================================== */
+
+:root {
+    --ocean-dark: #071d36;
+    --ocean-deep: #041426;
+    --ocean-card: #0d2b48;
+    --ocean-light: #123a59;
+    --turquoise: #48e8d5;
+    --turquoise-bright: #35dfcd;
+    --white: #ffffff;
+    --text-light: #d9e8f4;
+    --text-dark: #243b50;
+    --border: rgba(120, 200, 225, 0.2);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: var(--ocean-dark);
+    color: var(--text-light);
+    line-height: 1.7;
+}
+
+/* ========================================
+   NAVIGATION - RED SEA GLASS STYLE
+======================================== */
+
+.site-nav {
+    position: relative;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    width: calc(100% - 40px);
+    max-width: 1240px;
+    margin: 18px auto;
+    padding: 10px 12px 10px 24px;
+
+    background: rgba(4, 20, 38, 0.88);
+    border: 1px solid rgba(72, 232, 213, 0.18);
+    border-radius: 999px;
+
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.18);
+}
+
+.site-nav .site-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+
+    color: var(--white);
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+.site-nav .brand-icon {
+    color: var(--turquoise);
+    font-size: 23px;
+}
+
+.site-nav .nav-links {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 5px;
+
+    background: rgba(40, 42, 85, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    border-radius: 999px;
+}
+
+.site-nav .nav-links a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 11px 17px;
+    border-radius: 999px;
+
+    color: var(--text-light);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+
+    transition:
+        background 0.25s ease,
+        color 0.25s ease,
+        transform 0.25s ease;
+}
+
+.site-nav .nav-links a::after {
+    display: none;
+}
+
+.site-nav .nav-links a:hover,
+.site-nav .nav-links a:focus-visible {
+    color: var(--turquoise);
+    background: rgba(72, 232, 213, 0.09);
+}
+
+.site-nav .nav-links a.active {
+    color: var(--white);
+    background: linear-gradient(
+        135deg,
+        #087fae,
+        #0875c9
+    );
+    box-shadow: 0 3px 12px rgba(0, 117, 201, 0.2);
+}
+
+/* Mobile and tablet */
+@media (max-width: 768px) {
+    .site-nav {
+        flex-direction: column;
+        gap: 12px;
+        width: calc(100% - 24px);
+        margin: 12px auto;
+        padding: 16px;
+        border-radius: 24px;
+    }
+
+    .site-nav .site-brand {
+        justify-content: center;
+        white-space: normal;
+        text-align: center;
+        font-size: 14px;
+    }
+
+    .site-nav .nav-links {
+        width: 100%;
+        box-sizing: border-box;
+        border-radius: 18px;
+    }
+
+    .site-nav .nav-links a {
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 400px) {
+    .site-nav .nav-links {
+        gap: 3px;
+    }
+
+    .site-nav .nav-links a {
+        padding: 9px 10px;
+        font-size: 12px;
+    }
+}
+
+/* ========================================
+   GENERAL PAGE HEADERS
+======================================== */
+
+header {
+    min-height: 390px;
+    padding: 65px 25px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: var(--white);
+    background:
+        linear-gradient(
+            180deg,
+            rgba(3, 18, 39, 0.48),
+            rgba(3, 24, 48, 0.90)
+        ),
+        url("red-sea.jpg") center 45% / cover no-repeat;
+}
+
+header:not(.home-hero) h1 {
+    max-width: 950px;
+    margin: 0 auto 12px;
+    font-size: clamp(32px, 5vw, 48px);
+    line-height: 1.2;
+    font-weight: 800;
+    letter-spacing: -1px;
+    color: var(--white);
+    text-shadow: 0 3px 15px rgba(0, 0, 0, 0.4);
+}
+
+header:not(.home-hero) p {
+    max-width: 750px;
+    margin: 15px auto 0;
+    color: var(--white);
+    font-size: 18px;
+    line-height: 1.8;
+}
+
+/* ========================================
+   HOMEPAGE HERO
+======================================== */
+
+.home-hero {
+    min-height: 440px;
+    padding: 65px 25px 45px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: var(--white);
+    background:
+        linear-gradient(
+            180deg,
+            rgba(3, 18, 39, 0.30),
+            rgba(3, 24, 48, 0.82)
+        ),
+        url("home-hero.jpeg") center 45% / cover no-repeat;
+}
+
+.home-hero .hero-eyebrow {
+    margin: 0 0 22px;
+    color: var(--turquoise);
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 3px;
+    line-height: 1.8;
+}
+
+.home-hero h1 {
+    max-width: 950px;
+    margin: 0 auto;
+    color: var(--white);
+    font-size: clamp(38px, 6vw, 68px);
+    line-height: 1.15;
+    letter-spacing: -1px;
+    text-shadow: 0 4px 25px rgba(0, 0, 0, 0.5);
+}
+
+.home-hero h1 span {
+    display: block;
+    color: var(--turquoise);
+}
+
+.home-hero .hero-description {
+    max-width: 680px;
+    margin: 25px auto 0;
+    color: #f0f7ff;
+    font-size: 18px;
+    line-height: 1.8;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+}
+
+/* ========================================
+   BUTTONS
+======================================== */
+
+.hero-buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-top: 32px;
+}
+
+.btn {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 50px;
+    padding: 14px 25px;
+    border: 2px solid var(--turquoise-bright);
+    border-radius: 30px;
+    background: var(--turquoise-bright);
+    color: #06253b;
+    text-decoration: none;
+    text-align: center;
+    font-size: 16px;
+    font-weight: bold;
+    line-height: 1.4;
+    cursor: pointer;
+    transition:
+        background-color 0.25s ease,
+        color 0.25s ease,
+        border-color 0.25s ease,
+        transform 0.25s ease,
+        box-shadow 0.25s ease;
+}
+
+.home-hero .btn {
+    margin: 0;
+}
+
+.btn:hover,
+.btn:focus-visible {
+    background: var(--white);
+    border-color: var(--white);
+    color: #06253b;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.home-hero .btn.secondary {
+    background: rgba(4, 20, 38, 0.90);
+    border-color: var(--white);
+    color: var(--white);
+}
+
+.home-hero .btn.secondary:hover,
+.home-hero .btn.secondary:focus-visible {
+    background: var(--white);
+    border-color: var(--white);
+    color: #06253b;
+}
+
+/* ========================================
+   SCROLL INDICATOR
+======================================== */
+
+.scroll-indicator {
+    width: 25px;
+    height: 42px;
+    margin-top: 30px;
+    padding-top: 7px;
+    display: flex;
+    justify-content: center;
+    border: 2px solid rgba(255, 255, 255, 0.75);
+    border-radius: 20px;
+}
+
+.scroll-indicator span {
+    width: 4px;
+    height: 8px;
+    border-radius: 5px;
+    background: var(--turquoise);
+    animation: scrollMove 1.5s ease-in-out infinite;
+}
+
+@keyframes scrollMove {
+    0%, 100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(9px);
+    }
+}
+
+/* ========================================
+   MAIN CONTENT
+======================================== */
+
+main {
+    width: 90%;
+    max-width: 1100px;
+    margin: 45px auto;
+}
+
+main section {
+    margin-bottom: 28px;
+    padding: 30px;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    background: var(--ocean-card);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.18);
+    animation: fadeUp 0.65s ease both;
+}
+
+main section h2 {
+    margin-top: 0;
+    margin-bottom: 18px;
+    color: var(--turquoise);
+    font-size: clamp(25px, 3vw, 32px);
+    line-height: 1.3;
+}
+
+main section h3 {
+    color: var(--turquoise);
+    font-size: 22px;
+    line-height: 1.4;
+}
+
+main section p {
+    margin: 0 0 17px;
+    color: var(--text-light);
+    font-size: 17px;
+    line-height: 1.9;
+}
+
+main section p:last-child {
+    margin-bottom: 0;
+}
+
+main section strong {
+    color: var(--white);
+}
+
+main section ul {
+    padding-left: 25px;
+}
+
+main section li {
+    margin-bottom: 12px;
+    color: var(--text-light);
+    line-height: 1.8;
+}
+
+.intro-section {
+    border-left: 5px solid var(--turquoise);
+}
+
+.highlight-section {
+    border-top: 4px solid var(--turquoise);
+    background: linear-gradient(
+        135deg,
+        var(--ocean-card),
+        var(--ocean-light)
+    );
+}
+
+/* ========================================
+   IMAGES
+======================================== */
+
+main section img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 24px auto;
+    border-radius: 16px;
+}
+
+main section.intro-section > img {
+    width: 100%;
+    max-height: 480px;
+    object-fit: cover;
+}
+
+/* ========================================
+   TEXT LINKS
+======================================== */
+
+.text-link {
+    display: inline-block;
+    margin-top: 12px;
+    color: var(--turquoise);
+    font-size: 16px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: color 0.25s ease, transform 0.25s ease;
+}
+
+.text-link:hover,
+.text-link:focus-visible {
+    color: var(--white);
+    text-decoration: underline;
+    transform: translateX(4px);
+}
+
+/* ========================================
+   MARINE LIFE CARDS
+======================================== */
+
+.cards-container {
+    display: flex;
+    align-items: stretch;
+    gap: 22px;
+}
+
+.card {
+    flex: 1 1 0;
+    min-width: 0;
+    overflow: hidden;
+    padding: 18px;
+    border: 1px solid rgba(120, 200, 225, 0.18);
+    border-radius: 16px;
+    background: #f7fcff;
+    box-shadow: 0 7px 22px rgba(0, 0, 0, 0.16);
+    transition:
+        transform 0.3s ease,
+        box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-7px);
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25);
+}
+
+.card img {
+    width: 100%;
+    height: 220px;
+    margin: 0 0 18px;
+    border-radius: 12px;
+    object-fit: cover;
+    transition: transform 0.35s ease;
+}
+
+.card:hover img {
+    transform: scale(1.035);
+}
+
+.card h3 {
+    margin: 5px 0 12px;
+    color: #007f8b;
+    font-size: 21px;
+    line-height: 1.35;
+}
+
+.card p {
+    margin: 0;
+    color: #34495e;
+    font-size: 15px;
+    line-height: 1.8;
+}
+
+/* ========================================
+   FUN FACT
+======================================== */
+
+.fun-fact {
+    text-align: center;
+    background: linear-gradient(
+        135deg,
+        #07325b,
+        #006d91
+    );
+    border: 1px solid rgba(72, 232, 213, 0.35);
+}
+
+main section.fun-fact h2 {
+    color: var(--turquoise);
+    font-size: 26px;
+}
+
+main section.fun-fact p {
+    color: var(--white);
+    font-size: 18px;
+}
+
+/* ========================================
+   PROTECT MARINE LIFE
+======================================== */
+
+.protection-list {
+    padding-left: 25px;
+}
+
+.protection-list li {
+    margin-bottom: 14px;
+    padding: 15px;
+    border-left: 4px solid var(--turquoise);
+    border-radius: 8px;
+    background: rgba(72, 232, 213, 0.07);
+    transition:
+        background-color 0.25s ease,
+        transform 0.25s ease;
+}
+
+.protection-list li:hover {
+    background: rgba(72, 232, 213, 0.14);
+    transform: translateX(5px);
+}
+
+.protection-list strong {
+    color: var(--turquoise);
+}
+
+.coral-section {
+    background: linear-gradient(
+        135deg,
+        #0d2b48,
+        #103b58
+    );
+}
+
+.coral-message {
+    margin-top: 25px;
+    padding: 22px;
+    border: 1px solid rgba(72, 232, 213, 0.3);
+    border-radius: 14px;
+    background: #041a30;
+    text-align: center;
+}
+
+main section .coral-message h3 {
+    margin-top: 0;
+    color: var(--turquoise);
+    font-size: 24px;
+}
+
+main section .coral-message p {
+    margin-bottom: 0;
+    color: var(--white);
+    font-size: 18px;
+}
+
+/* ========================================
+   FOOTER
+======================================== */
+
+footer {
+    margin-top: 45px;
+    padding: 28px 20px;
+    border-top: 1px solid var(--border);
+    background: var(--ocean-deep);
+    color: var(--text-light);
+    text-align: center;
+}
+
+footer p {
+    margin: 7px 0;
+    font-size: 15px;
+    line-height: 1.8;
+}
+
+footer strong {
+    color: var(--turquoise);
+    font-size: 17px;
+}
+
+/* ========================================
+   ANIMATIONS
+======================================== */
+
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ========================================
+   HOMEPAGE - RED SEA EXPERIENCES
+======================================== */
+
+.experiences-section {
+    position: relative;
+    overflow: hidden;
+    background:
+        radial-gradient(
+            circle at top right,
+            rgba(53, 223, 205, 0.09),
+            transparent 38%
+        ),
+        linear-gradient(145deg, #0d2b48, #071d36);
+}
+
+.section-eyebrow {
+    color: #48e8d5 !important;
+    font-size: 12px !important;
+    font-weight: bold;
+    letter-spacing: 3px;
+    margin-bottom: 10px !important;
+}
+
+.experiences-section > h2 {
+    margin-top: 0;
+    font-size: clamp(27px, 4vw, 38px);
+}
+
+.experiences-intro {
+    max-width: 760px;
+    margin-bottom: 30px !important;
+}
+
+.experience-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+    margin-top: 30px;
+}
+
+.experience-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    min-width: 0;
+    min-height: 270px;
+    padding: 25px 22px;
+    overflow: hidden;
+    border: 1px solid rgba(72, 232, 213, 0.23);
+    border-radius: 17px;
+    background: linear-gradient(
+        155deg,
+        #123a59,
+        #09223b
+    );
+    text-decoration: none;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.15);
+    transition:
+        transform 0.3s ease,
+        border-color 0.3s ease,
+        box-shadow 0.3s ease,
+        background 0.3s ease;
+}
+
+.experience-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 3px;
+    background: #48e8d5;
+    transition: width 0.3s ease;
+}
+
+.experience-card:hover,
+.experience-card:focus-visible {
+    transform: translateY(-7px);
+    border-color: #48e8d5;
+    background: linear-gradient(
+        155deg,
+        #164566,
+        #0b2945
+    );
+    box-shadow: 0 16px 30px rgba(0, 0, 0, 0.28);
+    outline: none;
+}
+
+.experience-card:hover::before,
+.experience-card:focus-visible::before {
+    width: 100%;
+}
+
+.experience-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 43px;
+    height: 43px;
+    margin-bottom: 22px;
+    border: 1px solid rgba(72, 232, 213, 0.4);
+    border-radius: 12px;
+    background: rgba(72, 232, 213, 0.1);
+    color: #48e8d5;
+    font-size: 15px;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.experience-card h3 {
+    margin: 0 0 12px;
+    color: #ffffff;
+    font-size: 20px;
+    line-height: 1.4;
+}
+
+.experience-card p {
+    flex-grow: 1;
+    margin: 0 0 22px;
+    color: #d9e8f4;
+    font-size: 15px;
+    line-height: 1.8;
+}
+
+.experience-link {
+    display: inline-block;
+    color: #48e8d5;
+    font-size: 14px;
+    font-weight: bold;
+    transition: color 0.25s ease;
+}
+
+.experience-card:hover .experience-link,
+.experience-card:focus-visible .experience-link {
+    color: #ffffff;
+}
+
+/* ========================================
+   HERO INTRODUCTION - INNER PAGES
+======================================== */
+
+header:not(.home-hero) .hero-eyebrow {
+    width: 100%;
+    margin: 0 0 22px;
+    color: var(--turquoise);
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 4px;
+    line-height: 1.8;
+    text-transform: uppercase;
+    text-shadow: 0 0 18px rgba(72, 232, 213, 0.25);
+    text-align: center;
+}
+
+header:not(.home-hero) .hero-description {
+    max-width: 760px;
+    margin: 24px auto 0;
+    color: #f0f7ff;
+    font-size: 18px;
+    line-height: 1.9;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+}
+
+header:not(.home-hero) h1 span {
+    display: inline;
+    color: var(--turquoise);
+    text-shadow: 0 0 18px rgba(72, 232, 213, 0.25);
+}
+
+/* ========================================
+   PAGE-SPECIFIC HERO BACKGROUNDS
+======================================== */
+
+/* Protect Marine Life: new background image */
+
+body:has(.protect-hero) .protect-hero {
+    background:
+        linear-gradient(
+            180deg,
+            rgba(3, 18, 39, 0.45),
+            rgba(3, 24, 48, 0.82)
+        ),
+        url("./protect-hero.jpeg") center 35% / cover no-repeat;
+}
+
+/* Marine Life: keep the existing image unchanged */
+
+body:not(:has(.protect-hero)):has(nav a[href="marine-life.html"]) header:not(.home-hero) {
+    background:
+        linear-gradient(
+            180deg,
+            rgba(3, 18, 39, 0.40),
+            rgba(3, 24, 48, 0.88)
+        ),
+      url("protect-marine-life-hero.jpeg") center 45% / cover no-repeat;
+}
+
+/* ========================================
+   MAJOR THREATS TO THE RED SEA
+======================================== */
+
+.threats-section {
+    padding: 35px;
+    overflow: hidden;
+    background: linear-gradient(
+        145deg,
+        #0b203b,
+        #07172c
+    );
+    border: 1px solid rgba(72, 232, 213, 0.12);
+}
+
+.threats-section > .section-eyebrow {
+    margin-bottom: 12px;
+    color: #48e8d5;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 3px;
+}
+
+.threats-section > h2 {
+    margin-bottom: 18px;
+    color: #f5f8ff;
+    font-size: clamp(28px, 4vw, 40px);
+    line-height: 1.25;
+}
+
+.threats-intro {
+    max-width: 850px;
+    margin-bottom: 32px;
+    color: #c5d5e9;
+    font-size: 17px;
+    line-height: 1.9;
+}
+
+.threats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 28px;
+}
+
+.threat-card {
+    min-width: 0;
+    overflow: hidden;
+    background: #0d2039;
+    border: 1px solid rgba(128, 180, 210, 0.18);
+    border-radius: 16px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+    transition:
+        transform 0.3s ease,
+        border-color 0.3s ease,
+        box-shadow 0.3s ease;
+}
+
+.threat-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(72, 232, 213, 0.45);
+    box-shadow: 0 18px 36px rgba(0, 0, 0, 0.25);
+}
+
+.threat-card > img {
+    display: block;
+    width: 100%;
+    height: 280px;
+    object-fit: cover;
+    object-position: center;
+}
+.threat-card:nth-child(3) {
+    grid-column: 1 / -1;
+}
+
+.threat-content {
+    padding: 28px;
+}
+
+.threat-number {
+    display: inline-block;
+    margin-bottom: 12px;
+    color: #48e8d5;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+}
+
+.threat-content h3 {
+    margin: 0 0 18px;
+    color: #f5f8ff;
+    font-size: 29px;
+    line-height: 1.3;
+}
+
+.threat-content > p {
+    margin-bottom: 24px;
+    color: #cfdbec;
+    font-size: 16px;
+    line-height: 1.9;
+}
+
+.threat-stat {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 24px;
+    border: 1px solid rgba(255, 112, 112, 0.22);
+    border-radius: 22px;
+    background: rgba(255, 95, 95, 0.09);
+    color: #ff8278;
+}
+
+.threat-stat p {
+    margin: 0;
+    color: #ff8278;
+    line-height: 1.5;
+}
+
+/* ========================================
+   TABLETS AND MOBILE
+======================================== */
+
+@media (max-width: 850px) {
+    .experience-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    nav {
+        gap: 10px 20px;
+        padding: 16px 12px;
+    }
+
+    nav a {
+        font-size: 14px;
+    }
+
+    header {
+        min-height: 320px;
+        padding: 50px 18px;
+    }
+
+    .home-hero {
+        min-height: 410px;
+        padding: 55px 18px 35px;
+        background-position: center center;
+    }
+
+    .home-hero .hero-eyebrow {
+        font-size: 11px;
+        letter-spacing: 2px;
+    }
+
+    .home-hero h1 {
+        font-size: clamp(35px, 8vw, 48px);
+    }
+
+    .home-hero .hero-description {
+        font-size: 16px;
+    }
+
+    .hero-buttons {
+        width: 100%;
+        max-width: 330px;
+        flex-direction: column;
+    }
+
+    .hero-buttons .btn {
+        width: 100%;
+    }
+
+    header:not(.home-hero) .hero-eyebrow {
+        font-size: 11px;
+        letter-spacing: 3px;
+    }
+
+    header:not(.home-hero) .hero-description {
+        font-size: 16px;
+    }
+
+    main {
+        width: 92%;
+        margin: 28px auto;
+    }
+
+    main section {
+        padding: 23px 20px;
+    }
+
+    main section p {
+        font-size: 16px;
+    }
+
+    .cards-container {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .card {
+        flex: auto;
+        width: 100%;
+    }
+
+    .card img {
+        height: 240px;
+    }
+
+    .experience-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .experience-card {
+        min-height: 230px;
+        padding: 23px;
+    }
+
+    .section-eyebrow {
+        letter-spacing: 2px;
+    }
+
+    .threats-section {
+        padding: 23px 20px;
+    }
+
+    .threat-card > img {
+        height: 230px;
+    }
+
+    .threat-content {
+        padding: 22px;
+    }
+
+    .threat-content h3 {
+        font-size: 25px;
+    }
+
+    .threat-stat {
+        gap: 11px;
+        padding: 16px;
+    }
+    .threats-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 400px) {
+    nav {
+        gap: 8px 13px;
+    }
+
+    nav a {
+        font-size: 13px;
+    }
+
+    main section {
+        padding: 19px 15px;
+    }
+
+    .home-hero h1 {
+        font-size: 34px;
+    }
+
+    .card img {
+        height: 210px;
+    }
+
+    .threats-section {
+        padding: 19px 15px;
+    }
+
+    .threat-content {
+        padding: 18px;
+    }
+
+    .threat-card > img {
+        height: 200px;
+    }
+}
+
+/* ========================================
+   ACCESSIBILITY: REDUCED MOTION
+======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+.stat-icon {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ff8278;
+    font-size: 0;
+    position: relative;
+}
+
+.stat-icon::before {
+    content: "⚠";
+    font-family: Arial, sans-serif;
+    font-size: 29px;
+    line-height: 1;
+    color: #ff8278;
+}
+/* Red Sea Knowledge Quiz */
+.quiz-section {
+    padding: 80px 20px;
+    background: var(--ocean-deep);
+    color: white;
+}
+
+.quiz-container {
+    max-width: 850px;
+    margin: auto;
+}
+
+.quiz-section h2 {
+    color: var(--turquoise);
+    font-size: clamp(28px, 4vw, 40px);
+    margin: 12px 0;
+}
+
+.quiz-intro {
+    color: #c5d5e5;
+    line-height: 1.8;
+    margin-bottom: 35px;
+}
+
+.quiz-question {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(72, 232, 213, 0.2);
+    border-radius: 14px;
+    padding: 25px;
+    margin-bottom: 25px;
+}
+
+.quiz-question h3 {
+    color: var(--turquoise);
+    margin-bottom: 20px;
+}
+
+.quiz-question label {
+    display: block;
+    padding: 12px;
+    margin: 8px 0;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.04);
+    cursor: pointer;
+    line-height: 1.6;
+    transition: background 0.2s ease;
+}
+
+.quiz-question label:hover {
+    background: rgba(72, 232, 213, 0.12);
+}
+
+.quiz-question input {
+    accent-color: var(--turquoise);
+    margin-right: 10px;
+}
+
+#quiz-result {
+    margin-top: 20px;
+    color: var(--turquoise);
+    font-weight: bold;
+    font-size: 18px;
+}
+/* =========================================
+   RED SEA ORIGIN & COASTAL CITIES
+   Matching the original ocean theme
+========================================= */
+
+/* Shared section headings */
+.origin-section .section-eyebrow,
+.coastal-section .section-eyebrow {
+    display: inline-block;
+    margin: 0 0 12px;
+    color: var(--turquoise);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    line-height: 1.8;
+}
+
+/* Red Sea origin */
+main section.origin-section {
+    padding: 35px;
+    background: var(--ocean-card);
+    border: 1px solid var(--border);
+    border-left: 5px solid var(--turquoise);
+}
+
+.origin-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    gap: 35px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.origin-image {
+    min-width: 0;
+}
+
+.origin-image img {
+    display: block;
+    width: 100%;
+    height: 450px;
+    margin: 0;
+    border-radius: 12px;
+    object-fit: contain;
+    background-color: #071d36;
+}
+
+.origin-image-label {
+    margin-top: 10px;
+    color: #bcd4e5;
+    font-size: 13px;
+}
+
+.origin-content h2 {
+    margin: 0 0 18px;
+    color: var(--turquoise);
+    font-size: clamp(26px, 3vw, 34px);
+    line-height: 1.3;
+}
+
+.origin-content > p {
+    margin: 0 0 14px;
+    color: var(--text-light);
+    font-size: 16px;
+    line-height: 1.85;
+}
+
+.origin-fact {
+    margin-top: 20px;
+    padding: 17px;
+    border-left: 3px solid var(--turquoise);
+    background: rgba(72, 232, 213, 0.06);
+}
+
+.origin-fact h3 {
+    margin: 0 0 6px;
+    color: var(--turquoise);
+    font-size: 18px;
+}
+
+.origin-fact p {
+    margin: 0;
+    color: var(--text-light);
+    font-size: 14px;
+    line-height: 1.8;
+}
+
+.origin-link {
+    display: inline-block;
+    margin-top: 20px;
+    color: var(--turquoise);
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.origin-link:hover,
+.origin-link:focus-visible {
+    color: var(--white);
+    text-decoration: underline;
+}
+
+/* Coastal cities */
+main section.coastal-section {
+    padding: 35px;
+    background: var(--ocean-card);
+    border: 1px solid var(--border);
+}
+
+.coastal-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.coastal-heading {
+    max-width: 760px;
+    margin: 0 auto 30px;
+    text-align: center;
+}
+
+.coastal-heading h2 {
+    margin: 0 0 14px;
+    color: var(--turquoise);
+    font-size: clamp(26px, 3vw, 34px);
+    line-height: 1.3;
+}
+
+.coastal-heading > p {
+    margin: 0;
+    color: var(--text-light);
+    font-size: 16px;
+    line-height: 1.85;
+}
+
+.coastal-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.coastal-card {
+    min-width: 0;
+    overflow: hidden;
+    background: #09233c;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    transition: border-color 0.25s ease, transform 0.25s ease;
+}
+
+.coastal-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--turquoise);
+}
+
+.coastal-card-image {
+    position: relative;
+    overflow: hidden;
+}
+
+.coastal-card-image img {
+    display: block;
+    width: 100%;
+    height: 220px;
+    margin: 0;
+    border-radius: 0;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.coastal-card:hover .coastal-card-image img {
+    transform: scale(1.03);
+}
+
+.coastal-number {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--ocean-deep);
+    color: var(--turquoise);
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.coastal-card-content {
+    padding: 20px;
+}
+
+.city-tag {
+    display: inline-block;
+    margin-bottom: 8px;
+    color: var(--turquoise);
+    font-size: 11px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    line-height: 1.7;
+}
+
+.coastal-card-content h3 {
+    margin: 0 0 8px;
+    color: var(--white);
+    font-size: 22px;
+}
+
+.coastal-card-content p {
+    margin: 0;
+    color: var(--text-light);
+    font-size: 15px;
+    line-height: 1.8;
+}
+
+.coastal-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    margin-top: 25px;
+    padding-top: 22px;
+    border-top: 1px solid var(--border);
+}
+
+.coastal-footer p {
+    margin: 0;
+    color: var(--text-light);
+    font-size: 15px;
+    line-height: 1.8;
+}
+
+.coastal-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex-shrink: 0;
+    padding: 12px 18px;
+    border: 1px solid var(--turquoise);
+    border-radius: 30px;
+    background: var(--turquoise);
+    color: var(--ocean-deep);
+    font-size: 14px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: background 0.25s ease, color 0.25s ease;
+}
+
+.coastal-button:hover,
+.coastal-button:focus-visible {
+    background: transparent;
+    color: var(--turquoise);
+}
+
+/* Responsive layout */
+@media (max-width: 768px) {
+    main section.origin-section,
+    main section.coastal-section {
+        padding: 23px 20px;
+    }
+
+    .origin-container {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+
+    .origin-image img {
+        height: 280px;
+    }
+
+    .coastal-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .coastal-card-image img {
+        height: 230px;
+    }
+
+    .coastal-footer {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .coastal-button {
+        align-self: flex-start;
+    }
+}
+
+@media (max-width: 400px) {
+    main section.origin-section,
+    main section.coastal-section {
+        padding: 19px 15px;
+    }
+
+    .origin-image img {
+        height: 220px;
+    }
+
+    .coastal-card-image img {
+        height: 200px;
+    }
+
+    .coastal-card-content {
+        padding: 16px;
+    }
+
+    .coastal-button {
+        width: 100%;
+    }
+}
+/* ========================================
+   RED SEA - SUBTLE VISUAL MOTION
+======================================== */
+
+/* Smooth scrolling between page sections */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Gentle entrance for main content sections */
+@keyframes oceanFadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(18px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Apply a subtle entrance effect */
+main section {
+    animation: oceanFadeUp 0.65s ease both;
+}
+
+/* Slightly stagger the first few sections */
+main section:nth-child(1) {
+    animation-delay: 0.05s;
+}
+
+main section:nth-child(2) {
+    animation-delay: 0.12s;
+}
+
+main section:nth-child(3) {
+    animation-delay: 0.19s;
+}
+
+/* Smooth interaction for content images */
+main section img {
+    transition:
+        transform 0.35s ease,
+        filter 0.35s ease;
+}
+
+/* Respect accessibility preferences */
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+
+    main section {
+        animation: none !important;
+    }
+
+    main section img {
+        transition: none !important;
+    }
+}
+/* ==========================================
+   RED SEA - VISUAL POLISH PACK
+   Safe additions for the existing website
+========================================== */
+
+/* 1. Ocean glow and depth for content cards */
+.card,
+.coastal-card,
+.experience-card,
+.threat-card,
+.quiz-question {
+    position: relative;
+    isolation: isolate;
+    transition:
+        transform 0.3s ease,
+        box-shadow 0.3s ease,
+        border-color 0.3s ease;
+}
+
+/* Keep card content above the decorative glow */
+.card > *,
+.coastal-card > *,
+.experience-card > *,
+.threat-card > *,
+.quiz-question > * {
+    position: relative;
+    z-index: 1;
+}
+
+/* 2. Soft turquoise glow on hover */
+@media (hover: hover) and (pointer: fine) {
+    .card:hover,
+    .coastal-card:hover,
+    .experience-card:hover,
+    .threat-card:hover,
+    .quiz-question:hover {
+        transform: translateY(-5px);
+        box-shadow:
+            0 12px 30px rgba(0, 0, 0, 0.22),
+            0 0 18px rgba(72, 232, 213, 0.10);
+        border-color: rgba(72, 232, 213, 0.65);
+    }
+}
+
+/* 3. Subtle highlight for existing buttons */
+.btn,
+.coastal-button {
+    position: relative;
+    overflow: hidden;
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease,
+        background-color 0.25s ease,
+        color 0.25s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .btn:hover,
+    .coastal-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(72, 232, 213, 0.18);
+    }
+
+    .btn:active,
+    .coastal-button:active {
+        transform: translateY(0);
+    }
+}
+
+/* 4. Clear keyboard focus for accessibility */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[role="button"]:focus-visible {
+    outline: 2px solid var(--turquoise);
+    outline-offset: 4px;
+}
+
+/* 5. Gentle image enhancement */
+@media (hover: hover) and (pointer: fine) {
+    .card:hover img,
+    .experience-card:hover img,
+    .threat-card:hover > img {
+        filter: saturate(1.08) brightness(1.03);
+    }
+}
+
+/* 6. Avoid extra motion when the visitor requests reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .card,
+    .coastal-card,
+    .experience-card,
+    .threat-card,
+    .quiz-question,
+    .btn,
+    .coastal-button {
+        transition: none !important;
+        transform: none !important;
+    }
+}
+/* ==========================================
+   RED SEA - VIRTUAL DONATION CAMPAIGN
+========================================== */
+
+.donation-section {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    margin: 55px auto;
+    padding: 65px 25px;
+    border: 1px solid rgba(72, 232, 213, 0.28);
+    border-radius: 22px;
+    background:
+        radial-gradient(
+            ellipse at 90% 10%,
+            rgba(72, 232, 213, 0.15),
+            transparent 45%
+        ),
+        linear-gradient(135deg, #0b2945, #071d36 65%);
+    text-align: center;
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.2);
+}
+
+.donation-content {
+    max-width: 760px;
+    margin: 0 auto;
+}
+
+.donation-eyebrow {
+    display: inline-block;
+    margin-bottom: 15px;
+    color: var(--turquoise, #48e8d5);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 3px;
+}
+
+.donation-section h2 {
+    margin: 0 auto 18px;
+    color: #fff;
+    font-size: clamp(28px, 4vw, 43px);
+    line-height: 1.25;
+}
+
+.donation-description {
+    max-width: 650px;
+    margin: 0 auto 30px;
+    color: #c5d5e5;
+    font-size: 16px;
+    line-height: 1.9;
+}
+
+.donation-panel {
+    max-width: 560px;
+    margin: 30px auto 0;
+    padding: 30px;
+    border: 1px solid rgba(72, 232, 213, 0.22);
+    border-radius: 18px;
+    background: rgba(4, 22, 41, 0.62);
+    text-align: left;
+}
+
+.donation-panel > h3 {
+    margin: 0 0 22px;
+    color: #fff;
+    font-size: 21px;
+    text-align: center;
+}
+
+.donation-amounts {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 25px;
+}
+
+.donation-amount {
+    padding: 13px 8px;
+    border: 1px solid rgba(72, 232, 213, 0.35);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.04);
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.donation-amount:hover {
+    border-color: var(--turquoise, #48e8d5);
+    transform: translateY(-2px);
+}
+
+.donation-amount.selected {
+    border-color: var(--turquoise, #48e8d5);
+    background: var(--turquoise, #48e8d5);
+    color: #071d36;
+}
+
+.donation-panel > label {
+    display: block;
+    margin-bottom: 10px;
+    color: #d8e7f2;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.donation-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 15px;
+    border: 1px solid rgba(72, 232, 213, 0.3);
+    border-radius: 10px;
+    background: #071d36;
+    color: var(--turquoise, #48e8d5);
+    font-size: 19px;
+    font-weight: 700;
+}
+
+.donation-input-wrap:focus-within {
+    border-color: var(--turquoise, #48e8d5);
+    box-shadow: 0 0 0 3px rgba(72, 232, 213, 0.1);
+}
+
+.donation-input-wrap input {
+    width: 100%;
+    min-width: 0;
+    padding: 15px 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: #fff;
+    font: inherit;
+    font-size: 16px;
+}
+
+.donation-input-wrap input::placeholder {
+    color: #7893aa;
+}
+
+.donation-button {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 22px;
+    padding: 15px 20px;
+    border: 1px solid var(--turquoise, #48e8d5);
+    border-radius: 50px;
+    background: var(--turquoise, #48e8d5);
+    color: #071d36;
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease,
+        background 0.25s ease;
+}
+
+.donation-button:hover {
+    transform: translateY(-2px);
+    background: #fff;
+    border-color: #fff;
+    box-shadow: 0 8px 25px rgba(72, 232, 213, 0.2);
+}
+
+.donation-note {
+    margin: 16px 0 0;
+    color: #9cb8ce;
+    font-size: 12px;
+    line-height: 1.7;
+    text-align: center;
+}
+
+.donation-error {
+    margin: 12px 0 0;
+    color: #ffaaa3;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.donation-message {
+    margin-top: 24px;
+    padding: 22px 18px;
+    border: 1px solid rgba(72, 232, 213, 0.4);
+    border-radius: 14px;
+    background: rgba(72, 232, 213, 0.08);
+    color: #fff;
+    text-align: center;
+}
+
+.donation-message[hidden],
+.donation-error[hidden] {
+    display: none;
+}
+
+.donation-success-icon {
+    display: inline-grid;
+    width: 42px;
+    height: 42px;
+    place-items: center;
+    margin-bottom: 10px;
+    border-radius: 50%;
+    background: var(--turquoise, #48e8d5);
+    color: #071d36;
+    font-size: 25px;
+    font-weight: 800;
+}
+
+.donation-message h3 {
+    margin: 0 0 10px;
+    color: var(--turquoise, #48e8d5);
+    font-size: 21px;
+}
+
+.donation-message p {
+    margin: 8px 0 0;
+    line-height: 1.8;
+}
+
+.donation-message .donation-receipt-note {
+    color: #9cb8ce;
+    font-size: 12px;
+}
+
+.donation-amount:focus-visible,
+.donation-button:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 4px;
+}
+
+@media (max-width: 600px) {
+    .donation-section {
+        margin: 35px auto;
+        padding: 40px 16px;
+        border-radius: 16px;
+    }
+
+    .donation-panel {
+        padding: 22px 16px;
+    }
+
+    .donation-amounts {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .donation-eyebrow {
+        letter-spacing: 2px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .donation-amount,
+    .donation-button {
+        transition: none;
+    }
+
+    .donation-amount:hover,
+    .donation-button:hover {
+        transform: none;
+    }
+}
+/* ===== Coral Paradise Section ===== */
+
+.coral-paradise {
+    position: relative;
+    overflow: hidden;
+    padding: 40px 3%;
+    margin: 25px 0;
+    color: #f4fbff;
+    background: linear-gradient(135deg, #061a32, #082c50);
+    border-radius: 24px;
+}
+
+.coral-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: center;
+    gap: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.coral-visual {
+    position: relative;
+    min-width: 0;
+    overflow: hidden;
+    border-radius: 18px;
+    border: 1px solid rgba(66, 208, 255, 0.35);
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.25);
+}
+
+.coral-visual img {
+    display: block;
+    width: 100%;
+    height: 600px;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.coral-visual:hover img {
+    transform: scale(1.04);
+}
+
+.coral-image-caption {
+    position: absolute;
+    right: 16px;
+    bottom: 16px;
+    left: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    background: rgba(3, 24, 46, 0.88);
+    color: #fff;
+    font-size: 14px;
+    backdrop-filter: blur(8px);
+}
+
+.coral-image-caption span:first-child {
+    font-size: 22px;
+}
+
+.coral-content {
+    min-width: 0;
+}
+
+.coral-eyebrow {
+    display: inline-block;
+    margin-bottom: 14px;
+    color: #44d7ee;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 2.5px;
+}
+
+.coral-content h2 {
+    margin: 0 0 20px;
+    color: #fff;
+    font-size: clamp(26px, 2.5vw, 36px);
+    line-height: 1.2;
+}
+
+.coral-content h2 span {
+    color: #36d2e7;
+}
+
+.coral-content > p {
+    color: #c7dbea;
+    font-size: 16px;
+    line-height: 1.85;
+}
+
+.coral-features {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin: 20px 0;
+}
+
+.coral-feature {
+    padding: 14px 10px;
+    border: 1px solid rgba(74, 198, 235, 0.18);
+    border-radius: 14px;
+    background: rgba(14, 74, 112, 0.38);
+    transition: transform 0.25s ease,
+                background 0.25s ease;
+}
+
+.coral-feature:hover {
+    transform: translateY(-5px);
+    background: rgba(14, 94, 135, 0.55);
+}
+
+.coral-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    margin-bottom: 12px;
+    border-radius: 50%;
+    background: rgba(42, 199, 222, 0.15);
+    font-size: 23px;
+}
+
+.coral-feature h3 {
+    margin: 0 0 8px;
+    color: #fff;
+    font-size: 17px;
+}
+
+.coral-feature p {
+    margin: 0;
+    color: #c3d9e9;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.coral-content .coral-description {
+    margin: 22px 0;
+}
+
+.coral-protection {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    margin-top: 18px;
+    padding: 18px;
+    border: 1px solid rgba(55, 190, 255, 0.3);
+    border-radius: 16px;
+    background: linear-gradient(
+        135deg,
+        rgba(9, 70, 117, 0.8),
+        rgba(7, 43, 78, 0.8)
+    );
+}
+
+.protection-icon {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: rgba(46, 203, 226, 0.18);
+    font-size: 24px;
+}
+
+.coral-protection h3 {
+    margin: 2px 0 10px;
+    color: #5ce2ee;
+    font-size: 20px;
+}
+
+.coral-protection p {
+    margin: 0;
+    color: #d3e5f2;
+    font-size: 14px;
+    line-height: 1.8;
+}
+
+/* Responsive layout */
+@media (max-width: 900px) {
+    .coral-layout {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+
+    .coral-visual img {
+        height: 500px;
+    }
+
+    .coral-content h2 {
+        font-size: clamp(26px, 2.5vw, 36px);
+    }
+}
+
+@media (max-width: 520px) {
+    .coral-paradise {
+        padding: 24px 16px;
+        border-radius: 16px;
+    }
+
+    .coral-visual img {
+        height: 380px;
+    }
+
+    .coral-features {
+        grid-template-columns: 1fr;
+    }
+
+    .coral-feature {
+        display: grid;
+        grid-template-columns: 44px 1fr;
+        column-gap: 12px;
+        align-items: center;
+    }
+
+    .coral-icon {
+        grid-row: span 2;
+        margin: 0;
+    }
+
+    .coral-feature h3 {
+        margin-bottom: 4px;
+    }
+
+    .coral-content h2 {
+        font-size: 29px;
+    }
+
+    .coral-protection {
+        padding: 16px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .coral-visual img,
+    .coral-feature {
+        transition: none;
+    }
+
+    .coral-visual:hover img,
+    .coral-feature:hover {
+        transform: none;
+    }
+}
+/* Explore the Red Sea - Compact Design */
+.intro-section {
+    max-width: 1050px;
+    margin: 35px auto;
+    padding: 30px 24px;
+    border-radius: 22px;
+    background: linear-gradient(145deg, #0b2944, #071d36);
+    border: 1px solid rgba(90, 210, 220, 0.18);
+    box-sizing: border-box;
+}
+
+.intro-content {
+    max-width: 850px;
+    margin: 0 auto;
+}
+
+.intro-label {
+    display: inline-block;
+    color: #62d9d2;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+}
+
+.intro-section h2 {
+    color: #ffffff;
+    font-size: clamp(27px, 3vw, 36px);
+    margin: 0 0 16px;
+    line-height: 1.3;
+}
+
+.intro-section h2 span {
+    color: #62d9d2;
+}
+
+.intro-section p {
+    color: #d4e4ef;
+    font-size: 15px;
+    line-height: 1.8;
+    margin: 0 0 16px;
+}
+
+.intro-image {
+    margin: 22px 0;
+    overflow: hidden;
+    border-radius: 16px;
+    border: 1px solid rgba(98, 217, 210, 0.25);
+}
+
+.intro-image img {
+    display: block;
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+.intro-image:hover img {
+    transform: scale(1.03);
+}
+
+.intro-section h3 {
+    color: #62d9d2;
+    font-size: 21px;
+    margin: 22px 0 12px;
+}
+
+.intro-highlight {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    margin-top: 20px;
+    border-left: 3px solid #62d9d2;
+    border-radius: 10px;
+    background: rgba(98, 217, 210, 0.08);
+}
+
+.intro-highlight span {
+    font-size: 25px;
+    flex-shrink: 0;
+}
+
+.intro-highlight p {
+    margin: 0;
+    font-size: 14px;
+}
+
+@media (max-width: 600px) {
+    .intro-section {
+        margin: 20px 12px;
+        padding: 22px 16px;
+        border-radius: 16px;
+    }
+
+    .intro-image img {
+        height: 220px;
+    }
+
+    .intro-section p {
+        font-size: 14px;
+        line-height: 1.7;
+    }
+
+    .intro-section h3 {
+        font-size: 19px;
+    }
+}
+/* Language toggle button */
+.site-nav .site-language-toggle {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    min-width: 88px;
+    min-height: 42px;
+    padding: 9px 16px;
+    border: 1px solid rgba(72, 232, 213, 0.45);
+    border-radius: 999px;
+    background: rgba(72, 232, 213, 0.08);
+    color: var(--turquoise);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.site-nav .site-language-toggle:hover {
+    transform: translateY(-2px);
+    background: var(--turquoise);
+    color: var(--ocean-deep);
+}
+
+.site-nav .site-language-toggle:focus-visible {
+    outline: 2px solid var(--white);
+    outline-offset: 3px;
+}
+
+@media (max-width: 768px) {
+    .site-nav .site-language-toggle {
+        align-self: center;
+    }
+}
+
+.page-topper {
+    background-position: center 48%;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+.home-top {
+    background-image:
+        linear-gradient(
+            180deg,
+            rgba(3, 18, 39, 0.38),
+            rgba(3, 24, 48, 0.84)
+        ),
+        url("./home-hero.jpeg");
+}
+
+.marine-top {
+    background-image:
+        linear-gradient(
+            180deg,
+            rgba(3, 18, 39, 0.38),
+            rgba(3, 24, 48, 0.84)
+        ),
+        url("./protect-marine-life-hero.jpeg");
+}
+
+.protect-top {
+    background-image:
+        linear-gradient(
+            180deg,
+            rgba(3, 18, 39, 0.38),
+            rgba(3, 24, 48, 0.84)
+        ),
+        url("./protect-hero.jpeg");
+}
+
+.page-topper .site-nav {
+    background: rgba(4, 20, 38, 0.48);
+}
+
+.page-topper > header {
+    background: transparent !important;
+}
+.protect-top {
+    background-position: center 25%;
+}
+.site-footer {
+    margin-top: 60px;
+    padding: 42px 7% 18px;
+    color: #eaf7ff;
+    background: linear-gradient(145deg, #06172b, #0a2c43);
+    border-top: 1px solid rgba(69, 221, 213, 0.35);
+}
+
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 36px;
+}
+
+.site-footer h2,
+.site-footer h3 {
+    margin: 0 0 14px;
+    color: #48ded2;
+}
+
+.site-footer h2 {
+    font-size: 1.35rem;
+}
+
+.site-footer h3 {
+    font-size: 1.05rem;
+}
+
+.site-footer p {
+    margin: 8px 0;
+    line-height: 1.8;
+    color: #c9dce8;
+}
+
+.footer-sources ul {
+    margin: 0;
+    padding-inline-start: 20px;
+}
+
+.footer-sources li {
+    margin: 9px 0;
+    color: #48ded2;
+}
+
+.site-footer a {
+    color: #d8f6f3;
+    text-decoration: none;
+    line-height: 1.7;
+    transition: color 0.2s ease;
+}
+
+.site-footer a:hover {
+    color: #48ded2;
+    text-decoration: underline;
+}
+
+.footer-team strong {
+    color: #fff;
+}
+
+.footer-bottom {
+    max-width: 1200px;
+    margin: 30px auto 0;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    text-align: center;
+}
+
+.footer-bottom p {
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+@media (max-width: 760px) {
+    .site-footer {
+        margin-top: 40px;
+        padding: 34px 6% 16px;
+    }
+
+    .footer-content {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+}
